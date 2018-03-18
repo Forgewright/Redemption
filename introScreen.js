@@ -28,7 +28,14 @@ function introScreen(url) {
 function finishIntroScreen() {
      $("#gameBorder").show();
      $("#introScreen").fadeOut(14000, introFinished);
- }   ASLEvent('ClearScreen', '');
+ }  
+/*
+* There was an ASLEvent here which was throwing an error because ClearScreen doesn't take a parameter 
+*  and an ASLEvent MUST send a parameter. I changed it to the JS clearScreen function, which is
+*  called by ClearScreen anyway.
+* -KV
+*/
+clearScreen();
 
 function introFinished() {
      $("#gameBorder").show();
