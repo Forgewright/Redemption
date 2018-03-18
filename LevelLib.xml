@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<library>
+  <!--
+  LevelLib is a basic character creation and levelling library for Quest. See the Wiki How to guide for details.
+  
+  Version 1.0
+  Quest version: 5.4
+  Written by: The Pixie
+  -->
+
+  <command name="IncCommand">
+    <pattern>Inc #text#</pattern>
+    <script><![CDATA[
+      if (TotalAttributes() < game.pov.maxpoints) {
+        value = GetAttribute(game.pov, text)
+        set (game.pov, text, value+1)
+      }
+      ChooseAttributes
+    ]]></script>
+  </command>
+  
+  <command name="DecCommand">
+    <pattern>Dec #text#</pattern>
+    <script><![CDATA[
+      value = GetAttribute(game.pov, text)
+      oldvalue = GetAttribute(game.pov, text+"_old")
+      if (value > oldvalue) {
+        set (game.pov, text, value-1)
+      }
+      ChooseAttributes
+    ]]></script>
+  </command>
+  
+  <command name="LevellingDoneCommand">
+    <pattern>Levelling Done</pattern>
+    <script>
+      game.notarealturn = true
+      game.pov.hitpoints = CalcFullHits () * game.proportionoffullhits / 1000
+	  game.pov.maxhpoints = game.pov.hitpoints
+      UpdateHitPoints
+	  if (game.pov.maxpoints - TotalAttributes()>0) {
+	    msg ("You still have points to assign!")
+	  }
+	  else {ReturnFromViewObjectScreen}
+    </script>
+  </command>
+  
+  <command name="LevellingCommand">
+    <pattern>level; level up; Level Up; Choose Attributes</pattern>
+    <script>
+      LevelUp
+    </script>
+  </command>
+  
+  
+  <function name="LevelNotice"><![CDATA[
+	if (game.pov.maxpoints - TotalAttributes()>0) {
+      msg ("<br/><b>You have attribute points to assign!</b><br/><i>Enter {command:Level Up} to assign points.</i><br/>")
+      msg ("{command:Stop this message}")
+    }
+  ]]></function>
+  
+  <command name="Stop this message">
+    <pattern>Stop this message</pattern>
+    <script>
+	  game.notarealturn = true
+      DisableTurnScript (level_notice)
+	  msg("This notice will no longer display until more points are distributed.") 
+	</script>
+  </command>
+  
+  
+  <function name="LevelUp"><![CDATA[
+      game.proportionoffullhits = 1000 * game.pov.hitpoints / CalcFullHits ()
+      foreach (att, game.pov.attlist) {
+         if (not HasInt (game.pov, att)) set (game.pov, att, 0)
+         set (game.pov, att + "_old", GetInt (game.pov, att))
+       }
+      ChooseAttributes
+  ]]></function>
+  
+    <function name="RaisePlayerLevel"><![CDATA[
+	    ViewObjectScreen
+		player.level = player.level + 1
+		player.maxpoints = game.pov.maxpoints + 1
+		msg("<h3>Congratulations! You have gained a level!</h3>")
+        wait {
+		  ChooseAttributes
+		}		
+  ]]></function>
+  
+  <function name="ChooseAttributes"><![CDATA[
+	  game.notarealturn = true
+	  ViewObjectScreen
+	  msg ("<center><h3>The Karukian Attribute Assignment Desk</h3></center>")
+      msg ("<b>You have " + (game.pov.maxpoints - TotalAttributes()) + " points available to assign.</b>")
+      msg(" ")
+      foreach (att, game.pov.attlist) {
+        msg (att + ": {command:Dec " + att + ":<<&nbsp;} {" + game.pov.name + "." + att + "} {command:Inc " + att + ":&nbsp;>>}")
+      }
+      msg ("")
+      msg ("{command:Levelling Done:<b>Done</b>}")
+      msg ("")
+      msg ("<b>Your character is defined by four statistics.</b>")
+	  msg ("<b>Stamina</b>:&nbsp; Used to determine the total hit points.")
+      msg ("<b>Strength</b>:&nbsp; Determines the maximum armour that can be worn, also a bonus to attack and damage rolls.")
+      msg ("<b>Agility</b>:&nbsp; A bonus to attack rolls and to your defence. Also determines your sneaking ability.")
+      msg ("<b>Intelligence</b>:&nbsp; Used to determine the maximum spell level you can learn.")
+  ]]></function>
+  
+  <function name="TotalAttributes" type="int">
+      total = 0
+      foreach (att, game.pov.attlist) {
+        total = total + GetInt (game.pov, att)
+      }
+      return (total)
+  </function>
+  
+  <function name="PointsLeft" type="int">
+      return (game.pov.maxpoints - TotalAttributes())
+  </function>
+</library>

@@ -1,0 +1,479 @@
+<?xml version="1.0"?>
+<library>
+
+
+
+
+
+
+
+  <!-- =================================================== -->
+  <!-- Verbs -->
+
+  <verb>
+    <property>attack</property>
+    <pattern>attack;fight;strike;kill;hit;swing;swing at</pattern>
+    <defaultexpression>"You can't attack " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>charge</property>
+    <pattern>charge</pattern>
+    <defaultexpression>"You can't attack " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>parry</property>
+    <pattern>parry</pattern>
+    <defaultexpression>"You can't attack " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>equip</property>
+    <pattern>equip;draw</pattern>
+    <defaultexpression>"You can't draw " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>unequip</property>
+    <pattern>unequip;sheathe</pattern>
+    <defaultexpression>"You can't sheathe " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>learn</property>
+    <pattern>learn</pattern>
+    <defaultexpression>"You can't learn " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>sellstuff</property>
+    <pattern>sellstuff</pattern>
+    <defaultexpression>"You can't sellstuff " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>smash</property>
+    <pattern>smash;break;destroy</pattern>
+    <defaultexpression>"You can't smash;break;destroy " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>harvest</property>
+    <pattern>harvest</pattern>
+    <defaultexpression>"You can't harvest " + object.article + "."</defaultexpression>
+  </verb>
+
+  <verb>
+    <property>brew</property>
+    <pattern>brew</pattern>
+    <defaultexpression><![CDATA["To brew a potion, you need to first find a recipe. Once you have the recipe, you need a workbench and the ingredients, and then you can use the BREW <recipe> command."]]></defaultexpression>
+  </verb>
+  
+  <verb>
+    <property>apply</property>
+    <pattern>apply</pattern>
+    <defaultexpression>"You can't apply " + object.article + "."</defaultexpression>
+  </verb>
+
+
+
+  <command name="credits">
+    <pattern>credits;about</pattern>
+    <script><![CDATA[
+      msg ("</br>This is a work of Interactive Fiction.")
+      msg (" ")
+      msg ("Version " + game.version + ".")
+      msg (" ")
+      msg ("It is written in Quest, which was created by Alex Warren, using CombatLib by The Pixie.")
+    ]]></script>
+  </command>
+  
+  <command name="version">
+    <pattern>help version</pattern>
+    <script><![CDATA[
+	  msg ("")
+      msg ("Version " + game.version + ".")
+    ]]></script>
+  </command>
+
+
+
+  <!-- =================================================== -->
+  <!-- Other commands -->
+
+  <command name="Smell">
+    <pattern>smell;sniff</pattern>
+    <script>
+      if (HasFullString(game.pov.parent, "smell")) {
+	    msg ("")
+        msg (game.pov.parent.smell)
+      }
+      else {
+	    msg ("")
+        msg ("You smell nothing usual.")
+      }
+    </script>
+  </command>
+  
+  
+  <command name="Listen">
+    <pattern>listen</pattern>
+    <script>
+      if (HasFullString(game.pov.parent, "listen")) {
+	    msg ("")
+        msg (game.pov.parent.listen)
+      }
+      else {
+	    msg ("")
+        msg ("It is quiet. Quiet as a grave...")
+      }
+    </script>
+  </command>
+
+  <!--
+  This version of take checks if the player has a spell that prevents her from taking stuff
+  -->
+  <command name="take">
+    <pattern>take #object#; get #object#; pick up #object#</pattern>
+    <multiple>
+      takeList = NewObjectList()
+      foreach (obj, ListExclude(ScopeVisibleNotHeldNotScenery(), game.pov)) {
+        if (obj.parent = game.pov.parent) {
+          list add (takeList, obj)
+        }
+      }
+      return (takeList)
+    </multiple>
+    <scope>notheld</scope>
+    <multipleobjects type="script">
+      game.pov.currentcommandpendingobjectscope = NewObjectList()
+      foreach (obj, ListExclude(ScopeVisibleNotHeldNotScenery(), game.pov)) {
+        if (obj.parent = game.pov.parent and not DoesInherit(obj, "npc_type")) {
+          list add (game.pov.currentcommandpendingobjectscope, obj)
+        }
+      }
+    </multipleobjects>
+    <script><![CDATA[
+      if (IsUnableToHold()) {
+        msg ("</br>You cannot pick anything up with <i>" + GetDisplayAlias(game.pov.currentspell) + "</i> active.")
+      }
+      else if (multiple and ListCount(object) = 0) {
+        msg ("</br>Nothing here to take.")
+      }
+      else {
+        foreach (obj, object) {
+		  msg ("")
+          DoTake (obj, multiple)
+        }
+      }
+    ]]></script>
+  </command>
+
+
+  
+  
+  <command name="IncreaseStat">
+    <pattern>increase #text#</pattern>
+    <script><![CDATA[
+      text = LCase(text)
+      if (game.pov.pointsleft < 1) {
+        msg ("</br>No points left to increase stats")
+      }
+      else if (not ListContains(Split("stamina;strength;agility;intelligence", ";"), text)) {
+        msg ("</br>I don't think that's a stat")
+      }
+      else {
+        set (game.pov, text, GetInt(game.pov, text) + 1)
+        game.pov.pointsleft = game.pov.pointsleft - 1
+		msg ("")
+        msg ("Your " + text + " is now " + GetInt(game.pov, text) + " (" + game.pov.pointsleft + " points left)")
+        UpdateArmour
+        UpdateStatus
+      }
+    ]]></script>
+  </command>
+  
+  
+  
+  <command name="ListSpells">
+    <pattern>spell;spells</pattern>
+    <script><![CDATA[
+      l = GetDirectChildren (spells_known)
+      if (ListCount(l) = 0) {
+        msg ("You do not know any spells.")
+      }
+      else if (ListCount(l) = 1) {
+        sp = ObjectListItem(l, 0)
+        msg ("You only know the spell <i>" + GetDisplayAlias(sp) + "</i>.")
+      }
+      else {
+        msg ("Spells you know:")
+        foreach (sp, l) {
+          msg ("<i>" + GetDisplayAlias(sp) + "</i>")
+        }
+      }
+    ]]></script>
+  </command>
+  
+  
+  
+  <command name="status">
+    <pattern>status;stats;stat</pattern>
+    <script>
+      if (HasString(game.pov, "alias")) {
+        msg ("Name: " + game.pov.alias)
+      }
+      if (GetBoolean(game.pov, "female")) {
+        msg ("Female")
+      }
+      else {
+        msg ("Male")
+      }
+      foreach (att, Split("strength|intelligence|agility|stamina", "|")) {
+        msg (CapFirst(att) + ": " + GetInt(game.pov, att))
+      }
+      msg ("On-going magic: " + game.pov.status)
+      msg ("Gold: " + game.pov.money)
+      msg ("Hitpoints: " + game.pov.hitpoints + "/" + CalcFullHits ())
+      msg ("Defence: " + game.pov.defence)
+      msg ("Armour: " + (game.pov.armour10/10))
+      if (ArmourTooHeavy()) {
+        msg ("... The armour is too heavy for you to fight effectively.")
+      }
+      if (not (game.pov.equipped = null)) msg ("Weapon: " + GetDisplayAlias (game.pov.equipped) + " " +  RunDelegateFunction (game.pov.equipped, "stats"))
+    </script>
+  </command>
+
+
+  <command name="focus">
+    <pattern>focus</pattern>
+    <script><![CDATA[
+      msg ("You spend a moment focusing your energies.")
+      game.pov.next_round_ob_bonus = 6
+      game.pov.db_bonus = 3
+    ]]></script>
+  </command>
+  
+
+  <command name="sneak">
+    <pattern>sneak</pattern>
+    <script><![CDATA[
+      msg ("You disappear into the shadows.")
+      game.pov.sneaklevel = game.pov.agility - game.pov.armour
+    ]]></script>
+  </command>
+  
+
+  <command name="cast_spell">
+    <pattern>cast #text#;invoke #text#</pattern>
+    <script>
+      f = _ProcessScopeCommand ("CastSpell", GetDirectChildren (spells_known), text)
+      if (not f) {
+        msg ("Is that even a spell?")
+      }
+    </script>
+  </command>
+	<function name="CastSpell" parameters="spell" type="boolean">
+    do(spell, "precast")
+    return(true)
+	</function>
+  
+
+  
+  <command name="Venom">
+    <pattern>venom</pattern>
+    <script>
+      if (not GetBoolean(game.pov, "haspoisonglands")) {
+        msg ("What about venom?")
+      }
+      else if (not game.pov.equipped.canbevenomed) {
+        if (HasString(game.pov.equipped, "novenommsg")) {
+          msg (game.pov.equipped.novenommsg)
+        }
+        else {
+          msg ("You cannot put venom on " + game.pov.equipped.alias + ".")
+        }
+      }
+      else if (not game.pov.equipped.venom = null) {
+        msg ("There is already venom on the blade.")
+      }
+      else {
+        game.pov.equipped.venom = spit_venom
+        msg ("You spit venom on your weapon.")
+      }
+    </script>
+  </command>
+
+
+
+  
+  <command name="Potion">
+    <pattern>potion;potions</pattern>
+    <script>
+      flag = false
+      foreach(o, GetDirectChildren (player)) {
+        if (DoesInherit(o, "recipe")) {
+          if (not flag) {
+            msg("Recipes found:")
+            flag = true
+          }
+          msg ("- " + CapFirst(GetDisplayAlias(o)) + " (" + o.count + ")")
+        }
+      }
+      if (not flag) {
+        msg("No recipes found yet...")
+      }
+
+      if (not GetObject("ingredients") = null) {
+        flag = false
+        foreach(o, GetDirectChildren (ingredients)) {
+          if (o.count > 0) {
+            if (not flag) {
+              msg("Ingredients:")
+              flag = true
+            }
+            msg ("- " + o.alias + " (" + o.count + ")")
+          }
+        }
+        if (not flag) {
+          msg("You have no ingredients.")
+        }
+      }
+    </script>
+  </command>
+  
+  
+  
+  <command name="BackToTheAction">
+    <pattern>Back to the action!</pattern>
+    <script>
+      ReturnFromViewObjectScreen
+    </script>
+  </command>
+  
+  
+  
+  <command name="ReadEanatasBackgroundStory">
+    <pattern>Read Eanatas background story</pattern>
+    <script>
+      do (player, "backstory")
+    </script>
+  </command>
+  
+  
+  <command name="ReadOrgBackgroundStory">
+    <pattern>Read Org background story</pattern>
+    <script>
+      do (orc_guard, "backstory")
+    </script>
+  </command>
+  
+    <command name="ReadMarieBackgroundStory">
+    <pattern>Read Marie background story</pattern>
+    <script>
+      do (old_hag, "backstory")
+    </script>
+  </command>
+  
+  
+  
+  <command name="Fly">
+    <pattern>Fly; fly</pattern>
+    <script><![CDATA[
+	    ClearTurn
+        if (HasAttribute(player.parent, "nofly")) {
+          if (player.parent.nofly = true) {
+            ClearTurn
+            msg ("It is too cramped in here to fly...")
+          }
+        }
+        else if (player.flying = false) {
+          player.attackbonus = player.attackbonus + player.level
+		  play sound ("Flapping Wings.wav", false, true)
+          EnableTurnScript (flyingturncounter)
+          player.flying = true
+          msg ("You spread out your wings and lift off the ground.<br>") 		  
+        }
+        else {
+          msg ("Hear that flapping sound. It's a pretty good indicator that you're flying.")
+        }
+    ]]></script>
+  </command>  
+  
+  
+  
+  <command name="Land">
+    <pattern>Land; land</pattern>
+    <script><![CDATA[
+	    ClearTurn
+        if (HasAttribute(player.parent, "noland")) {
+          msg ("You can not land here. The lava would kill you.")
+        }
+        else if (player.flying = true) {
+          player.flying = false		  
+          play sound ("land.wav", false, false)
+		  game.pov.attackbonus = player.attackbonus - player.level
+          EnableTurnScript (flyingturncounter)
+		  msg ("You pull in your wings and land.")
+        }
+        else {
+          msg ("<br/>Your not...ahh... flying.....")
+        }
+    ]]></script>
+  </command>  
+  
+  
+  
+  <function name="_ProcessScopeCommand" parameters="func, scope, text" type="boolean"><![CDATA[
+    value = Trim (LCase (text))
+    fullmatches = NewObjectList()
+    partialmatches = NewObjectList()
+    foreach (obj, scope) {
+      name = LCase(GetDisplayAlias(obj))
+      CompareNames (name, value, obj, fullmatches, partialmatches)
+      if (obj.alt <> null) {
+        foreach (altname, obj.alt) {
+          CompareNames (LCase(altname), value, obj, fullmatches, partialmatches)
+        }
+      }
+    }
+    if (game.lastobjects <> null) {
+      foreach (obj, game.lastobjects) {
+        CompareNames (LCase(obj.article), value, obj, fullmatches, partialmatches)
+        CompareNames (LCase(obj.gender), value, obj, fullmatches, partialmatches)
+      }
+    }
+    if (ListCount(fullmatches) = 1) {
+      game.scopecommandpending = ListItem(fullmatches, 0)
+    }
+    else if (ListCount(fullmatches) = 0 and ListCount(partialmatches) = 1) {
+      game.scopecommandpending = ListItem(partialmatches, 0)
+    }
+    else if (ListCount(fullmatches) + ListCount(partialmatches) = 0) {
+      return (false)
+    }
+    else {
+      menu = NewStringDictionary()
+      GenerateMenuChoices (menu, fullmatches)
+      GenerateMenuChoices (menu, partialmatches)
+      show menu (DynamicTemplate("DisambiguateMenu", value), menu, true) {
+        if (result <> null) {
+          game.scopecommandpending = GetObject(result)
+        }
+        else {
+          return (false)
+        }
+      }
+    }
+    on ready {
+      if (game.scopecommandpending = null) {
+        return (false)
+      }
+      else {
+        return (eval (func + "(" + game.scopecommandpending.name + ")"))
+      }
+    }
+  ]]></function>  
+
+</library>

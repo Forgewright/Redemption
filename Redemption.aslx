@@ -1,0 +1,1745 @@
+<!--Saved by Quest 5.7.6606.27193-->
+<asl version="550">
+  <include ref="English.aslx" />
+  <include ref="Core.aslx" />
+  <include ref="CombatLib.aslx" />
+  <include ref="NpcLib.aslx" />
+  <include ref="DoorLib.aslx" />
+  <game name="Redemption">
+    <gameid>052cf0ea-d926-4134-9e30-737c72a40d67</gameid>
+    <version>1.0</version>
+    <firstpublished>2018</firstpublished>
+    <feature_limitinventory />
+    <feature_lightdark />
+    <feature_asktell />
+    <feature_annotations />
+    <feature_advancedwearables />
+    <feature_advancedscripts />
+    <appendobjectdescription />
+    <allowlookdirections />
+    <turnoffcompass type="boolean">false</turnoffcompass>
+    <customstatuspane />
+    <panestheme>Parchment</panestheme>
+    <bordercolour>Black</bordercolour>
+    <defaultfontsize type="int">16</defaultfontsize>
+    <defaultfont>'Palatino Linotype', 'Book Antiqua', Palatino, serif</defaultfont>
+    <defaultbackground>Tan</defaultbackground>
+    <backgroundimage>mapoverland.png</backgroundimage>
+    <marginscolour>Tan</marginscolour>
+    <underlinehyperlinks type="boolean">false</underlinehyperlinks>
+    <menufontsize type="int">12</menufontsize>
+    <showlocation />
+    <setcustomwidth />
+    <customwidth type="int">1000</customwidth>
+    <setcustompadding />
+    <custompaddingtop type="int">252</custompaddingtop>
+    <custompaddingbottom type="int">25</custompaddingbottom>
+    <custompaddingleft type="int">25</custompaddingleft>
+    <borderlesscursor type="boolean">false</borderlesscursor>
+    <commandcursor><![CDATA[>>]]></commandcursor>
+    <attr name="autodescription_description" type="int">2</attr>
+    <attr name="autodescription_youcansee" type="int">3</attr>
+    <attr name="autodescription_youcango" type="int">4</attr>
+    <defaultwebfont>Wellfleet</defaultwebfont>
+    <clearscreenonroomenter />
+    <echocommand type="boolean">false</echocommand>
+    <autodisplayverbs type="boolean">false</autodisplayverbs>
+    <attr name="changeroom_newline" type="boolean">false</attr>
+    <autodescription />
+    <autodescription_youarein_useprefix />
+    <deactivatecommandlinks />
+    <autodescription_youarein_newline />
+    <autodescription_youcansee_newline />
+    <attr name="autodescription_youcango_newline" type="boolean">false</attr>
+    <autodescription_description_newline />
+    <notarealturn type="boolean">false</notarealturn>
+    <showdescriptiononenter />
+    <attr name="autodescription_youarein" type="int">1</attr>
+    <showmoney />
+    <moneyformat>Gold!</moneyformat>
+    <command_newline />
+    <shadowbox />
+    <custompaddingright type="int">25</custompaddingright>
+    <cover>cover.png</cover>
+    <defaultlinkforeground>Brown</defaultlinkforeground>
+    <statusandcompassattop />
+    <gridmap type="boolean">false</gridmap>
+    <mapexitwidth type="int">3</mapexitwidth>
+    <mapsize type="int">200</mapsize>
+    <respondtogridclicks type="boolean">false</respondtogridclicks>
+    <mapexitcolour>Brown</mapexitcolour>
+    <showborder type="boolean">false</showborder>
+    <setbackgroundopacity />
+    <backgroundopacity type="double">0.4</backgroundopacity>
+    <pov type="object">player</pov>
+    <start type="script">
+      JS.uiHide ("#location")
+      NPCListCreation
+      ColorInventory2Pane
+      CombatInitialise
+      player.maxhitpoints = 90
+      player.hitpoints = 90
+      JS.introScreen3 (GetFileUrl("dragon2.gif"))
+      JS.introScreen (GetFileUrl("flames.gif"))
+      JS.introScreen2 (GetFileUrl("monsterGroup2.gif"))
+    </start>
+    <inituserinterface type="script"><![CDATA[
+      s = "<table width=\"100%\"><tr>"
+      s = s + "   <td style=\"text-align:right;\" width=\"50%\">Hit points:</td>"
+      s = s + "   <td style=\"text-align:left;\" width=\"50%\"><span id=\"hits-span\">---</span></td>"
+      s = s + " </tr>"
+      s = s + " <tr>"
+      s = s + "   <td colspan=\"2\" style=\"border: thin solid;background:linen;text-align:left;\">"
+      s = s + "   <span id=\"hits-indicator\" style=\"background-color:green;padding-right:200px;\"></span>"
+      s = s + "   </td>"
+      s = s + " </tr>"
+      s = s + "</table>"
+      JS.setCustomStatus (s)
+      if (HasScript(player, "changedhitpoints")) {
+        do (player, "changedhitpoints")
+      }
+      SetTimeout (4) {
+        JS.eval ("$('#statusVarsLabel').insertBefore('#inventoryLabel')")
+        JS.eval ("$('#statusVarsAccordion').insertBefore('#inventoryLabel')")
+      }
+    ]]></inituserinterface>
+    <roomenter type="script">
+      ClearTurn
+      player.lastroom = player.parent
+    </roomenter>
+    <scopebackdrop type="script">
+      list add (items, ceiling)
+      list add (items, leather_strap)
+      list add (items, emblem)
+    </scopebackdrop>
+    <unresolvedcommandhandler type="script">
+      game.notarealturn = true
+      msg (Template("UnrecognisedCommand"))
+    </unresolvedcommandhandler>
+    <changedroomlist type="script">
+    </changedroomlist>
+    <turnscript name="TurnCountTurnScriptKV">
+      <enabled />
+      <script>
+        if (not HasAttribute(game,"turns")) {
+          game.turns = 0
+        }
+        if (not game.notarealturn) {
+          game.turns = game.turns + 1
+        }
+        game.notarealturn = false
+      </script>
+    </turnscript>
+    <turnscript name="flyingturncounter">
+      <script>
+        if (player.flying = true) {
+          player.flyingturnsleft = player.flyingturnsleft - 1
+          if (player.flyingturnsleft = 0) {
+            player.flying = false
+            stop sound
+            msg ("You have been forced to land.")
+          }
+        }
+        else if (player.flying = false) {
+          player.flyingturnsleft = player.flyingturnsleft + 1
+          if (player.flyingturnsleft = 10) {
+            DisableTurnScript (flyingturncounter)
+          }
+        }
+      </script>
+    </turnscript>
+    <command name="slapping">
+      <pattern>slap #object#</pattern>
+      <unresolved>Not sure what you are thinking, really...</unresolved>
+      <scope>notheld</scope>
+      <script>
+        foreach (obj, GetDirectChildren (player.parent)) {
+          if (HasAtrribute(obj, "monster")) {
+            msg ("You rethink doing that as it will only piss them off.")
+          }
+          else {
+            msg ("Hope you feel better now.")
+          }
+        }
+      </script>
+    </command>
+    <object name="spells_known">
+      <inherit name="editor_object" />
+    </object>
+  </game>
+  <object name="claws">
+    <inherit name="weapon" />
+    <alias>claws</alias>
+    <canberusted type="boolean">false</canberusted>
+    <canbevenomed type="boolean">false</canbevenomed>
+    <damagedicenumber type="int">2</damagedicenumber>
+    <damagedicesides type="int">8</damagedicesides>
+    <attackbonus type="int">1</attackbonus>
+    <element type="object">fire</element>
+  </object>
+  <command name="take">
+    <pattern>take #object#; get #object#; pick up #object#</pattern>
+    <multiple>
+      takeList = NewObjectList()
+      foreach (obj, ListExclude(ScopeVisibleNotHeldNotScenery(), game.pov)) {
+        if (obj.parent = game.pov.parent) {
+          list add (takeList, obj)
+        }
+      }
+      return (takeList)
+    </multiple>
+    <scope>notheld</scope>
+    <multipleobjects type="script">
+      game.pov.currentcommandpendingobjectscope = NewObjectList()
+      foreach (obj, ListExclude(ScopeVisibleNotHeldNotScenery(), game.pov)) {
+        if (obj.parent = game.pov.parent and not DoesInherit(obj, "npc_type")) {
+          list add (game.pov.currentcommandpendingobjectscope, obj)
+        }
+      }
+    </multipleobjects>
+    <script><![CDATA[
+      if (IsUnableToHold()) {
+        msg ("</br>You cannot pick anything up with <i>" + GetDisplayAlias(game.pov.currentspell) + "</i> active.")
+      }
+      else if (multiple and ListCount(object) = 0) {
+        msg ("</br>Nothing here to take.")
+      }
+      else {
+        foreach (obj, object) {
+          DoTake (obj, multiple)
+        }
+      }
+    ]]></script>
+  </command>
+  <object name="holding_room">
+    <inherit name="editor_room" />
+    <object name="goblin">
+      <inherit name="editor_object" />
+      <inherit name="multi_monster" />
+      <inherit name="male" />
+      <monstertype>Goblinoid</monstertype>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <prefix>a</prefix>
+      <level type="int">1</level>
+      <alias>goblin</alias>
+      <desc type="string"></desc>
+      <race>Goblin</race>
+      <mode>Kind</mode>
+      <descscript type="script">
+      </descscript>
+      <object name="Frosty Blast">
+        <inherit name="editor_object" />
+        <inherit name="monster_attack" />
+        <damagedicesides type="int">8</damagedicesides>
+        <damagebonus type="int">1</damagebonus>
+        <nonweapon />
+        <attackdesc>The % casts a Frosty Blast at you</attackdesc>
+        <element type="object">frost</element>
+      </object>
+      <object name="dagger">
+        <inherit name="editor_object" />
+        <inherit name="monster_attack" />
+        <attackdesc>The % thrusts at you with a dagger</attackdesc>
+      </object>
+    </object>
+  </object>
+  <object name="mount_mormont">
+    <inherit name="editor_room" />
+    <object name="prison_hall">
+      <alias>prison hall</alias>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <prefix>the</prefix>
+      <look type="string"></look>
+      <description>The room smells from what can only be feces. A table and chair for the guards is set against the south wall where a torch hangs in it's holder.</description>
+      <object name="orc">
+        <inherit name="editor_object" />
+        <inherit name="monster" />
+        <inherit name="namedmale" />
+        <lookwhendead>Boy, you tore his ass up.....</lookwhendead>
+        <level type="int">3</level>
+        <hitpoints type="int">60</hitpoints>
+        <guarding />
+        <armour type="int">3</armour>
+        <attackbonus type="int">3</attackbonus>
+        <damagedicenumber type="int">4</damagedicenumber>
+        <damagedicesides type="int">6</damagedicesides>
+        <damagebonus type="int">5</damagebonus>
+        <alias>Grod</alias>
+        <movetype>Constrained</movetype>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+          <value>Speak to</value>
+          <value>Attack</value>
+        </displayverbs>
+        <attackasgroup type="boolean">false</attackasgroup>
+        <warned type="int">1</warned>
+        <race>Orc</race>
+        <mode>Kind</mode>
+        <attackonsight type="boolean">false</attackonsight>
+        <speak type="script"><![CDATA[
+          ClearTurn
+          msg ("<br>I miss wreacking havoc on the battlefield.")
+        ]]></speak>
+        <descscript type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><h2>Grod the Orc Chieftain</h2></center>")
+          msg ("<img src=\"https://bobslifeblog.files.wordpress.com/2017/09/mountain-orc-male-2.png" + "\" style=\"float:right; width:300px;  padding-top: 80px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;\"/>")
+          msg ("<br>Grod looks as though he is bored. This orc has spent his life on the battlefield and guarding a prison just doesn't cut it. He doesn't wear armour but carries a broad axe.<br>")
+          msg ("His attack does " + this.damagedicenumber + "d" + this.damagedicesides + "+" + this.damagebonus +"  damage. ")
+          msg ("He has " + this.hitpoints + " hitpoints and is level " + this.level + ".<br><i><b> Be careful!</b></I>")
+          msg ("{command: Back to the action!}")
+        ]]></descscript>
+        <anoidbyflying type="script"><![CDATA[
+          if (orc.warned >= 3) {
+            player.flying turns = 0
+            EnableTurnScript (flyingturncounter)
+            player.flying = false
+            stop sound
+            ClearTurn
+            msg ("<br>Grod grabs you from the air and pounds his fist into you a couple times. Then, throws you against the wall.<br><i> \"I warned you, beast. Enough with the flying!</i><br>")
+          }
+          else if (orc.warned = 2 ) {
+            ClearTurn
+            msg ("<br>Grod gives you a stearn look, <br><i>\"I won't warn you again!\"<br>")
+            get input {
+              if (result = "land") {
+                HandleCommand ("land", null)
+                DisableTurnScript (IfFlying)
+              }
+              else {
+              }
+            }
+          }
+          else if (orc.warned = 1) {
+            msg ("<br>Grod looks bothered by your wing flapping. <br><i>\"Stop all that flying or it's my foot and your ass!\"")
+          }
+          orc.warned = orc.warned + 1
+        ]]></anoidbyflying>
+      </object>
+      <exit name="left cell door" alias="northwest" to="left_cell">
+        <inherit name="northwestdirection" />
+        <locked type="boolean">false</locked>
+        <lockmessage>The left cell door  is locked.</lockmessage>
+        <hasdoor />
+        <hasotherside />
+        <doorislockable />
+        <doorkeycount type="int">1</doorkeycount>
+        <doorlocked />
+        <doorautounlock />
+        <doornokeymessage>You do not have the key to this door.</doornokeymessage>
+        <doorhascustomalias />
+        <doorcustomalias>left cell door</doorcustomalias>
+        <look>Heavy wooden door with a sign that reads"Cell 1"</look>
+        <doorkey type="object">iron cell key</doorkey>
+      </exit>
+      <exit name="right cell door" alias="northeast" to="right_cell">
+        <inherit name="northeastdirection" />
+        <hasdoor />
+        <hasotherside />
+        <doorhascustomalias />
+        <doorcustomalias>right cell door</doorcustomalias>
+        <doorislockable />
+        <doorkeycount type="int">1</doorkeycount>
+        <doorlocked />
+        <doornokeymessage>You do not have the key to this door.</doornokeymessage>
+        <doorkey type="object">iron cell key</doorkey>
+        <onopen type="script">
+          msg ("A woman looks up at you from the floor and squints at the light. Holding her arm in front of her face, she sees you and crawls against the back wall. She hides her face and begins to wimper in fear.")
+        </onopen>
+      </exit>
+      <object name="left_cell">
+        <alias>left cell</alias>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+        </displayverbs>
+        <objectslistprefix>You can see</objectslistprefix>
+        <usedefaultprefix type="boolean">false</usedefaultprefix>
+        <prefix type="string"></prefix>
+        <scenery />
+        <look type="script">
+          msg ("")
+        </look>
+        <exit alias="southeast" to="prison_hall">
+          <inherit name="southeastdirection" />
+          <hasdoor />
+          <doorhascustomalias />
+          <doorcustomalias>left cell door</doorcustomalias>
+          <doorislockable />
+          <doorkeycount type="int">1</doorkeycount>
+          <doornokeymessage>You do not have the key to this door.</doornokeymessage>
+          <doorkey type="object">iron cell key</doorkey>
+        </exit>
+      </object>
+      <exit alias="west" to="barracks">
+        <inherit name="westdirection" />
+      </exit>
+      <object name="right_cell">
+        <alias>right cell</alias>
+        <usedefaultprefix type="boolean">false</usedefaultprefix>
+        <prefix type="string"></prefix>
+        <scenery />
+        <exit alias="southwest" to="prison_hall">
+          <inherit name="southwestdirection" />
+          <hasdoor />
+          <doorhascustomalias />
+          <doorcustomalias>right cell door</doorcustomalias>
+          <doorislockable />
+          <doorkeycount type="int">1</doorkeycount>
+          <doornokeymessage>You do not have the key to this door</doornokeymessage>
+          <doorkey type="object">iron cell key</doorkey>
+        </exit>
+        <object name="vivian">
+          <inherit name="editor_object" />
+          <alias>woman</alias>
+          <look type="script">
+            msg ("A beautiful young women wearing a fashionabe dress. She looks a bit disheveled but not injured.")
+          </look>
+        </object>
+      </object>
+      <exit alias="southeast" to="tunnel_ledge">
+        <inherit name="southeastdirection" />
+      </exit>
+      <object name="table">
+        <inherit name="editor_object" />
+        <inherit name="surface" />
+        <feature_container />
+        <hidechildren />
+        <listchildren />
+        <listchildrenprefix>On the table is</listchildrenprefix>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+        </displayverbs>
+        <move>You push the table over a bit. Nothing there but a stone floor.</move>
+        <look type="script">
+          msg ("A heavy wooden table with four legs.")
+        </look>
+        <object name="iron cell key">
+          <inherit name="editor_object" />
+          <take />
+          <volume type="int">1</volume>
+          <look>A black iron skeleton key with the word, "cells" carved on it.</look>
+          <inventoryverbs type="stringlist">
+            <value>Look at</value>
+            <value>Drop</value>
+          </inventoryverbs>
+        </object>
+      </object>
+      <object name="torch1">
+        <inherit name="editor_object" />
+        <alias>torch</alias>
+        <look>It burns at one end so those who can't see in the dark... can.</look>
+        <alt type="stringlist">
+          <value>holder</value>
+        </alt>
+        <take type="script">
+          msg ("You have no need of it. You can see in the dark. If you want to burn something, just cast a fire ball at it.")
+        </take>
+      </object>
+    </object>
+    <object name="cave">
+      <alias>Cave</alias>
+      <descprefix>You are in a</descprefix>
+      <scenery type="boolean">false</scenery>
+      <displayverbs type="stringlist">
+        <value>Look at</value>
+      </displayverbs>
+      <alt type="stringlist">
+        <value>room</value>
+      </alt>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <hasholder />
+      <exitslistprefix>There are exits to the</exitslistprefix>
+      <attr name="grid_borderwidth" type="int">2</attr>
+      <attr name="grid_border">Brown</attr>
+      <dropdestination type="object">cave</dropdestination>
+      <description type="script">
+        msg ("This outer cave belongs to a network of tunnels and rooms inside Mount Mormont and is quite large. Light comes in from the entrance to the west, leading to the lands of Bristol. Hot air blows in from an opening in the east wall, leading to a tunnel. ")
+      </description>
+      <enter type="script">
+      </enter>
+      <beforeenter type="script">
+      </beforeenter>
+      <beforefirstenter type="script">
+      </beforefirstenter>
+      <firstenter type="script">
+      </firstenter>
+      <exit alias="north" to="barracks">
+        <inherit name="northdirection" />
+        <look type="script">
+          ClearTurn
+          AddRoomObjects
+          do (torch_holder, "look")
+          msg ("There is an entrance leading to the barracks.")
+        </look>
+      </exit>
+      <object name="orc_guard">
+        <inherit name="editor_object" />
+        <inherit name="monster" />
+        <inherit name="namedmale" />
+        <race>Orc</race>
+        <level type="int">3</level>
+        <hitpoints type="int">30</hitpoints>
+        <defence type="int">1</defence>
+        <attackbonus type="int">1</attackbonus>
+        <damagedicenumber type="int">2</damagedicenumber>
+        <damagedicesides type="int">6</damagedicesides>
+        <damagebonus type="int">1</damagebonus>
+        <monstertype>Goblinoid</monstertype>
+        <alias>Org</alias>
+        <death><![CDATA[<br>Org reels backwards and falls to the floor, dead.]]></death>
+        <hurtbyweapon><![CDATA[<br>Org {random:growls:winces:roars} and {random:quickly:swiftly} {random:glances:stares} at his {random:injury:cut}.]]></hurtbyweapon>
+        <hurtbyspell type="string"></hurtbyspell>
+        <lookwhendead>Org is split open at the chest. You notice a puzzled look on his face.</lookwhendead>
+        <attackdesc><![CDATA[<br>% {random:swings at you: raises his sword and attacks: thrust with his sword at you: swings a broad attack at you: throws a quick elbow shot at your head}]]></attackdesc>
+        <inroomdescription type="string"></inroomdescription>
+        <scenery type="boolean">false</scenery>
+        <attackasgroup />
+        <mode>Kind</mode>
+        <attackonsight type="boolean">false</attackonsight>
+        <prefix type="string"></prefix>
+        <suffix>the orc guard standing at the {object:entrance_object_to_outside}</suffix>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+          <value>Speak to</value>
+          <value>Attack</value>
+        </displayverbs>
+        <thingstosay type="stringlist">
+          <value><![CDATA["An Ogre walks into a bar with a flint and steel. The bartender lets him in but says, "Don't start anything."<br><br/><i>He snorts out a chuckle.<i/>]]></value>
+          <value><![CDATA["Why do dwarves have such big nostrils?.......Because they have big fingers."<br><br/><i>He gives you a goofy grin.<i/>			                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ]]></value>
+          <value><![CDATA["In the town of Carn, Lord Talbert sent for his daughter, Vivian, but we stopped her coach and kidnapped her just north of here by the foothills of Shankspur Mountains, she is being held in the prison hall."<br><br/><i>He gives you a blank look.<i/>				                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]]></value>
+        </thingstosay>
+        <kick>You rethink kicking the massive orc. That kind of attack is not your strong suit and it would only piss him off. He is not your enemy...until you attack him.</kick>
+        <movetype>Forgetful</movetype>
+        <descscript type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><h2>Org the Orc Guard</h2></center>")
+          msg ("<img src=\"https://bobslifeblog.files.wordpress.com/2017/12/org-the-orc1.png" + "\" style=\"float:right; width:250px;  padding-top: 80px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;\"/>")
+          msg ("<br>For protection, he wears leather armor and carries a steel sword.<br><br>He jokes around, but his facial expression reads:<br> \"I may be dumb, but if you attack me, I'll pound your <br>anus into the ground\".<br><br>The orcs here are familiar with you, but will not hesitate to attack if you start anything.<br>")
+          msg ("His attack does " + this.damagedicenumber + "d" + this.damagedicesides + "+" + this.damagebonus +"  damage.")
+          msg ("He has " + this.hitpoints + " hitpoints and is level " + this.level)
+          msg ("<br></br>{command: Read Org background story }")
+          msg ("{command: Back to the action!}")
+        ]]></descscript>
+        <look type="script">
+          if (HasScript(this, "descscript")) {
+            do (this, "descscript")
+          }
+          else if (HasString(this, "loredesc") and game.pov.status = "Lore") {
+            msg (this.loredesc)
+          }
+          else if (HasString(this, "revealeddesc") and game.pov.status = "True Sight") {
+            msg (this.revealeddesc)
+          }
+          else if (HasString(this, "desc")) {
+            msg (this.desc)
+          }
+          else {
+            msg ("It looks like a " + GetDisplayName(this) + ".")
+          }
+          if (GetBoolean(game, "debug")) {
+            msg ("Hit points: " + this.hitpoints)
+            msg ("Defence: " + this.defence)
+            msg ("Armour: " + this.armour)
+          }
+        </look>
+        <backstory type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><h2>Org the Orc Guard Background</h2></center><br/>")
+          msg ("To be added later...")
+          msg ("{command: Back to the action!}")
+        ]]></backstory>
+        <attack type="script"><![CDATA[
+          ChangeHostility (this.race)
+          this.temp_db = 0
+          this.temp_ob_now = 0
+          this.temp_ob_next = 0
+          this.temp_damage = 0
+          this.temp_desc = "<br>You {random:swing:stab with:thrust with} your"
+          ClearTurn
+          do (this, "doattack")
+        ]]></attack>
+        <speak type="script"><![CDATA[
+          ClearTurn
+          if (orc_guard.mode = "Kind") {
+            if (ListCount(orc_guard.thingstosay) = 0) {
+              msg ("<br/>\"Thats all I have for now.\"")
+            }
+            else {
+              n = GetRandomInt (0, ListCount(orc_guard.thingstosay) - 1)
+              msg ("<br>The Orc says, " + StringListItem(orc_guard.thingstosay, n))
+              list remove (orc_guard.thingstosay, StringListItem(orc_guard.thingstosay, n))
+            }
+          }
+          else {
+            ClearTurn
+            msg ("<br/>No talking. Only killing!")
+          }
+        ]]></speak>
+      </object>
+      <object name="silver_goblet">
+        <inherit name="editor_object" />
+        <inherit name="merchandise" />
+        <alias>silver goblet</alias>
+        <price type="int">2</price>
+        <take />
+        <scenery type="boolean">false</scenery>
+        <inroomdescription type="string"></inroomdescription>
+        <desc><![CDATA[</br>A plain looking silver goblet with a hande.]]></desc>
+        <ontake type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You take the silver goblet.")
+        ]]></ontake>
+        <ondrop type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You drop the silver goblet.")
+        ]]></ondrop>
+        <look type="script">
+          ClearTurn
+          if (HasString(this, "loredesc") and game.pov.status = "Lore") {
+            P (this.loredesc)
+          }
+          else if (HasString(this, "revealeddesc") and game.pov.status = "True Sight") {
+            P (this.revealeddesc)
+          }
+          else if (HasString(this, "desc")) {
+            P (this.desc)
+          }
+          else {
+            P ("It's just an ordinary " + GetDisplayAlias(this) + "...")
+          }
+          do (this, "printstats")
+        </look>
+      </object>
+      <object name="silver_dagger">
+        <inherit name="editor_object" />
+        <inherit name="weapon" />
+        <alias>silver dagger</alias>
+        <usedefaultprefix type="boolean">false</usedefaultprefix>
+        <prefix>a</prefix>
+        <desc><![CDATA[<br/>A short, but very sharp blade. It has an ornate handle depicting a skull.]]></desc>
+        <inroomdescription type="string"></inroomdescription>
+        <price type="int">5</price>
+        <scenery type="boolean">false</scenery>
+        <ontake type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You take the silver dagger.")
+        ]]></ontake>
+        <look type="script">
+          ClearTurn
+          if (HasString(this, "loredesc") and game.pov.status = "Lore") {
+            P (this.loredesc)
+          }
+          else if (HasString(this, "revealeddesc") and game.pov.status = "True Sight") {
+            P (this.revealeddesc)
+          }
+          else if (HasString(this, "desc")) {
+            P (this.desc)
+          }
+          else {
+            P ("It's just an ordinary " + GetDisplayAlias(this) + "...")
+          }
+          do (this, "printstats")
+        </look>
+        <throw type="script"><![CDATA[
+          msg ("<br/>You throw the dagger and it lands on the floor.")
+          MoveObject (dagger, player.parent)
+        ]]></throw>
+      </object>
+      <exit name="south" alias="south" to="hags_den">
+        <inherit name="southdirection" />
+        <look type="script">
+          msg ("An opening along the south wall has a wooden sign next it. \"Hag's Den\"")
+        </look>
+      </exit>
+      <exit alias="east" to="sloping_tunnel">
+        <inherit name="eastdirection" />
+        <look type="script"><![CDATA[
+          ClearTurn
+          msg ("<br>The wall is made from a smooth gray stone. There is an opening and through it you can see a tunnel leading slightly down and to the east.")
+        ]]></look>
+      </exit>
+      <object name="opening">
+        <inherit name="editor_object" />
+        <scenery />
+        <alias>opening</alias>
+        <desc>The smooth stone looks like it has been melted away forming an archway to a tunnel leading deeper into the mountain.</desc>
+        <inroomdescription type="string"></inroomdescription>
+        <alt type="stringlist">
+          <value>tunnel</value>
+          <value>east</value>
+          <value>east wall</value>
+        </alt>
+        <look type="script"><![CDATA[
+          ClearTurn
+          msg ("<br/>The opening is smaller than the west entrance, but is still quite large. It leads to a tunnel sloping down slightly into the mountain. The other end is not visible from here.")
+        ]]></look>
+      </object>
+      <object name="entrance_object_to_outside">
+        <inherit name="editor_object" />
+        <scenery />
+        <alias>entrance</alias>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+        </displayverbs>
+        <look type="script"><![CDATA[
+          ClearTurn
+          msg ("Through the large opening you can see a path, leading up and down the side of Mount Mormont.")
+          if (orc_guard.parent = cave) {
+            if (Contains (cave,orc_guard)) {
+              msg ("<br><i>You catch Org with his finger digging at something in his nose. He gives you a goofy grin and continues with his mining.</i> <br/> *Need to add more random actions by Org here.*")
+            }
+          }
+        ]]></look>
+      </object>
+      <object name="torch_holder">
+        <inherit name="editor_object" />
+        <inherit name="surface" />
+        <scenery />
+        <alias>torch holder</alias>
+        <withouttorchdescription type="string"></withouttorchdescription>
+        <withtorchdescription>A black iron ring with a {torch.state} torch in it.</withtorchdescription>
+        <alt type="stringlist">
+          <value>holder</value>
+        </alt>
+        <inroomdescription type="string"></inroomdescription>
+        <displayverbs type="stringlist">
+          <value>Look at</value>
+        </displayverbs>
+        <feature_container />
+        <open type="boolean">false</open>
+        <close type="boolean">false</close>
+        <look type="script">
+          if (torch.parent = torch_holder) {
+            msg ("The black iron ring holds a torch, which is {torch.state}")
+          }
+          else {
+            msg ("The black iron ring is empty.")
+          }
+        </look>
+        <take type="script">
+          msg ("It is firmly attached to the stone wall and refuses to budge.")
+        </take>
+        <addscript type="script">
+          RoomSetUp
+          if (not object = torch) {
+            msg ("That doesn't belong in there.")
+          }
+          else {
+            msg ("Done.")
+            MoveObject (torch, torch_holder)
+          }
+        </addscript>
+        <object name="torch">
+          <inherit name="editor_object" />
+          <alias>torch</alias>
+          <state>lit</state>
+          <take />
+          <dropmsg>.</dropmsg>
+          <price type="int">1</price>
+          <volume type="int">1</volume>
+          <feature_lightdark />
+          <lightsource />
+          <lightstrength>strong</lightstrength>
+          <attr name="feature_switchable" type="boolean">false</attr>
+          <switchedon type="boolean">false</switchedon>
+          <switchonmsg>You use the available fire source to light the torch.</switchonmsg>
+          <switchoffmsg>You snuff out the torch.</switchoffmsg>
+          <light>You have learned in the past that the torches here are fueled by magic and can not be snuffed off or lit. They always burn, even in water.</light>
+          <displayverbs type="stringlist">
+            <value>Look at</value>
+            <value>Take</value>
+            <value>Snuff</value>
+          </displayverbs>
+          <look type="script"><![CDATA[
+            ClearTurn
+            msg ("</br>A wooden post with something wrapped at the end. It is " + this.state + ".")
+          ]]></look>
+          <ondrop type="script"><![CDATA[
+            ClearTurn
+            msg ("</br>You decide to drop the torch.")
+          ]]></ondrop>
+          <ontake type="script"><![CDATA[
+            ClearTurn
+            msg ("</br>You take the torch. {once:<i>You can see in the dark but you may need it otherwise.</i>}")
+          ]]></ontake>
+        </object>
+      </object>
+      <exit alias="west" to="mountain_path">
+        <inherit name="westdirection" />
+      </exit>
+      <object name="short_sword">
+        <inherit name="editor_object" />
+        <inherit name="weapon" />
+        <damagedicenumber type="int">2</damagedicenumber>
+        <canberusted type="boolean">false</canberusted>
+        <price type="int">2</price>
+        <alias>short sword</alias>
+        <takemsg>You take the short sword.</takemsg>
+        <dropmsg>You decide to drop the short sword.</dropmsg>
+        <equip type="script">
+          if (not this.parent = game.pov) {
+            msg ("You don't have it.")
+          }
+          else if (this.twohanded and not game.pov.shield = null) {
+            msg ("You cannot use a two-handed weapon with a shield.")
+          }
+          else {
+            if (not game.pov.equipped = claws and not game.pov.equipped = null) {
+              P (DynamicTemplate("WeaponSwap", this))
+            }
+            else {
+              P (DynamicTemplate("WeaponEquip", this))
+            }
+            game.pov.equipped.inventoryverbs = Split ("Look at;Drop;Equip;Sell", ";")
+            game.pov.equipped = this
+            this.inventoryverbs = Split ("Look at;Drop;Unequip", ";")
+            UpdateStatus
+          }
+        </equip>
+        <ontake type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You take the short sword.")
+        ]]></ontake>
+        <ondrop type="script"><![CDATA[
+          if (game.pov.equipped = this) {
+            MoveObject (short_sword, player.parent)
+            ClearTurn
+            msg ("</br>You decide to drop the short sword.")
+            game.pov.equipped = claws
+            this.inventoryverbs = Split ("Look at;Drop;Equip;Sell", ";")
+            UpdateStatus
+          }
+          else {
+            MoveObject (short_sword, player.parent)
+            ClearTurn
+            msg ("</br>You decide to drop the short sword.")
+          }
+        ]]></ondrop>
+      </object>
+    </object>
+    <object name="hags_den">
+      <inherit name="editor_room" />
+      <buys />
+      <alias>Hag's Den</alias>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <prefix>the</prefix>
+      <suffix type="string"></suffix>
+      <exitslistprefix><![CDATA[<br></br>The only exit is]]></exitslistprefix>
+      <attr name="grid_image">Rope.png</attr>
+      <attr name="grid_width" type="int">5</attr>
+      <attr name="grid_length" type="int">5</attr>
+      <attr name="grid_borderwidth" type="int">3</attr>
+      <attr name="grid_fill">Tan</attr>
+      <attr name="grid_border">Brown</attr>
+      <dropdestination type="object">hags_den</dropdestination>
+      <shopstock type="object">stock_room</shopstock>
+      <description type="script"><![CDATA[
+        msg ("This is a shop owned by a hag you know as {object:old_hag}.")
+        msg ("Against the east wall is a shelf with glass containers and metal pots set on small flames. It appears to be a mixing and brewing station.")
+        msg ("<br/><i><br/>{random:Marie is busy pouring a {random:brown:yellow:clear:red:blue} liquid into one of the pots.:Marie is {random:chopping:slicing:cutting} up {random:a plant:leaves:odd animal entrails} on a small wooden block:Marie is preoccupied with {random:writing:reading} a {random:recipe:book:spell}.}</i><br></br>")
+        msg ("There is a long table in the center of the room to hold items for sale.<br>")
+        buylist
+      ]]></description>
+      <beforeenter type="script">
+        JS.setGamePadding (75, 25, 30, 30)
+      </beforeenter>
+      <object name="stock_room">
+        <visible type="boolean">false</visible>
+        <shopstock type="object">stock_room</shopstock>
+        <description type="script">
+          msg (ShopInventory ())
+        </description>
+        <object name="silver_dagger1">
+          <inherit name="editor_object" />
+          <inherit name="weapon" />
+          <price type="int">6</price>
+          <canberusted type="boolean">false</canberusted>
+          <alias>silver dagger</alias>
+          <desc>An ornate dagger with a short, but very sharp blade.</desc>
+        </object>
+        <object name="potion_of_healing">
+          <inherit name="editor_object" />
+          <inherit name="healingpotion" />
+          <desc>This is a drinkable potion to restore you to full health.</desc>
+        </object>
+      </object>
+      <exit alias="north" to="cave">
+        <inherit name="northdirection" />
+      </exit>
+      <object name="old_hag">
+        <inherit name="editor_object" />
+        <inherit name="namedfemale" />
+        <inherit name="monster" />
+        <alias>Marie</alias>
+        <level type="int">3</level>
+        <hitpoints type="int">25</hitpoints>
+        <absorbsmagic />
+        <ignoresmagic type="boolean">false</ignoresmagic>
+        <nonweapon />
+        <monstertype>Corrupted</monstertype>
+        <movetype>Forgetful</movetype>
+        <scenery type="boolean">false</scenery>
+        <descscript type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><h2>Marie, The Old Hag</h2></center>")
+          msg ("<img src=\"https://bobslifeblog.files.wordpress.com/2017/08/old-hag.png" + "\" style=\"float:right; width:250px;  padding-top: 80px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;\"/>")
+          msg ("<br>She may not look like much, but you have learned she has great magical abilities. She is tolerant of you and will help in certain situations as long as it is beneficial to her.")
+          msg ("Her attack does " + this.damagedicenumber + "d" + this.damagedicesides + "+" + this.damagebonus +"  damage.")
+          msg ("She has " + this.hitpoints + " hitpoints and is level " + this.level)
+          msg ("<br></br>{command: Read Marie background story }")
+          msg ("{command: Back to the action!}")
+        ]]></descscript>
+        <backstory type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><h2>Marie, The Old Hag Background</h2></center><br/>")
+          msg ("To be added later...")
+          msg ("{command: Back to the action!}")
+        ]]></backstory>
+      </object>
+    </object>
+    <object name="sloping_tunnel">
+      <alias>tunnel</alias>
+      <hasholder />
+      <attr name="grid_image">beer.png</attr>
+      <dropdestination type="object">sloping_tunnel</dropdestination>
+      <enter type="script"><![CDATA[
+        if (player.flying = true) {
+          player.flying = false
+          stop sound
+          EnableTurnScript (flyingturncounter)
+          msg ("<br><i>The cramped space of the tunnel forces you to land.<i/><br/>")
+        }
+      ]]></enter>
+      <look type="script">
+      </look>
+      <description type="script"><![CDATA[
+        if (player.lastroom = cave) {
+          msg ("<br/>The round tunnel slopes down as you make your way east. Small roots have broken through the ceiling and most have been worn back to nubs from the traffic here. <br><br>As you reach the middle of the tunnel section, you squeeze past a large piece of volcanic rock partially obstructing the passageway. </br>")
+        }
+        else {
+          msg ("<br/>The round tunnel gently leads upwards as you make you way west. Further ahead you can see a large piece of volcanic rock partially obstructing the passageway.You squeeze past it and can see the west end of the tunnel. The ceiling is covered with nubs of roots that have broken through and worn down by the traffic here.</br>")
+        }
+      ]]></description>
+      <beforefirstenter type="script">
+      </beforefirstenter>
+      <firstenter type="script">
+      </firstenter>
+      <exit alias="east" to="tunnel_ledge">
+        <inherit name="eastdirection" />
+      </exit>
+      <exit alias="west" to="cave">
+        <inherit name="westdirection" />
+      </exit>
+      <object name="leather_pouch">
+        <inherit name="editor_object" />
+        <inherit name="merchandise" />
+        <inherit name="container_open" />
+        <price type="int">15</price>
+        <inroomdescription>A {object:leather_pouch} lies discarded here.</inroomdescription>
+        <desc>The new leather pouch has a strange emblem pressed into the fine leather and a strap around the mouth of the pouch is used to keep it closed.</desc>
+        <alias>leather pouch</alias>
+        <scenery type="boolean">false</scenery>
+        <attr name="leather_strap">A thin leather strap is woven around the neck of the pouch.</attr>
+        <emblem>A circle with a jagged line across it. You have no idea what the emblem means.</emblem>
+        <feature_container />
+        <isopen type="boolean">false</isopen>
+        <hidechildren />
+        <openmsg><![CDATA[</br>You loosen the leather strap on the pouch.]]></openmsg>
+        <closemsg><![CDATA[</br>You tighten the leather strap on the pouch.]]></closemsg>
+        <volume type="int">1</volume>
+        <onopen type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You loosen the leather strap on the pouch.")
+        ]]></onopen>
+        <onclose type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You tighten the leather strap on the pouch.")
+        ]]></onclose>
+        <ontake type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You take the leather pouch.")
+        ]]></ontake>
+        <ondrop type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You drop the leather pouch.")
+        ]]></ondrop>
+      </object>
+      <object name="roots">
+        <inherit name="editor_object" />
+        <inroomdescription type="string"></inroomdescription>
+        <look>Just some broken nubs that were once roots.</look>
+        <scenery />
+      </object>
+      <object name="tunnel">
+        <inherit name="editor_object" />
+        <desc>Stone seems to have been melted away giving the round passageway a smooth sheen coming from the torch in the north wall.</desc>
+        <alias>tunnel</alias>
+        <scenery />
+        <look>Stone seems to have been melted away giving the round passageway a smooth sheen coming from the torch in the north wall.</look>
+      </object>
+      <object name="volcanic_rock">
+        <inherit name="editor_object" />
+        <alias>rock</alias>
+        <scenery />
+        <desc>Just a large piece of volcanic rock. No doubt it shifted after the creation of the tunnel.</desc>
+        <take type="script"><![CDATA[
+          msg ("It is too large and it it stuck where it sits.")
+          if (shard.visible = false ) {
+            msg ("<i>You notice a sharp shard of the rock lying against the large rock.</i>")
+          }
+        ]]></take>
+        <look type="script">
+          black_shard.scenery = false
+          ClearTurn
+          msg ("Just a large piece of volcanic rock. No doubt it shifted after the creation of the tunnel.")
+          SetTimeout (3) {
+            msg ("You notice a small shard of volcanic glass tucked close to the large boulder.")
+          }
+        </look>
+      </object>
+      <object name="black_shard">
+        <inherit name="editor_object" />
+        <alias>black shard</alias>
+        <scenery />
+        <visible />
+        <inroomdescription type="string"></inroomdescription>
+        <take />
+        <volume type="int">1</volume>
+        <price type="int">5</price>
+        <look type="script">
+          black_shard.scenery = false
+          msg ("A piece of black volcanic rock about the size of your fist. It is shaped like an arrow head.")
+        </look>
+        <ontake type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You take the shard.")
+        ]]></ontake>
+        <ondrop type="script"><![CDATA[
+          ClearTurn
+          msg ("</br>You drop the shard.")
+        ]]></ondrop>
+      </object>
+    </object>
+    <object name="mountain_path">
+      <alias>mountain path</alias>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <scenery type="boolean">false</scenery>
+      <descprefix>You are on a</descprefix>
+      <attr name="grid_image">Revive_potion.png</attr>
+      <dropdestination type="object">mountain_path</dropdestination>
+      <exit alias="east" to="cave">
+        <inherit name="eastdirection" />
+      </exit>
+    </object>
+    <object name="tunnel_ledge">
+      <inherit name="editor_room" />
+      <alias>ledge</alias>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <descprefix>You are on</descprefix>
+      <prefix>a</prefix>
+      <dropdestination type="object">tunnel_ledge</dropdestination>
+      <exit alias="northwest" to="prison_hall">
+        <inherit name="northwestdirection" />
+      </exit>
+      <exit alias="west" to="sloping_tunnel">
+        <inherit name="westdirection" />
+      </exit>
+    </object>
+    <object name="room_start_entrance">
+      <inherit name="editor_room" />
+      <descprefix><![CDATA[<b>You are in]]></descprefix>
+      <exitslistprefix>There are exits to the </exitslistprefix>
+      <usedefaultprefix type="boolean">false</usedefaultprefix>
+      <objectslistprefix>You can see</objectslistprefix>
+      <prefix> a</prefix>
+      <attr name="implementation_notes"><![CDATA[add these  functions and requests to 'after enter script' when ready for intro. also add image scripts at top of introScreen.js files to the start script.<br/>ClearScreen<br/>introText<br/>request (Hide, "Command")<br/>request (Hide, "Panes")<br/>request (Hide, "Location")]]></attr>
+      <dropdestination type="object">room_start_entrance</dropdestination>
+      <description type="script">
+        ClearScreen
+        msg ("You find yourself standing in a large room made from stone blocks.{once: It is the beginning of a series of rooms and hallways beneath Mount Mormont located in the kingdom of Bristol, England.}")
+      </description>
+      <beforeenter type="script">
+      </beforeenter>
+      <enter type="script">
+        ClearScreen
+        introText
+        request (Hide, "Command")
+        request (Hide, "Panes")
+        request (Hide, "Location")
+      </enter>
+      <onexit type="script">
+      </onexit>
+      <object name="player">
+        <inherit name="editor_object" />
+        <inherit name="editor_player" />
+        <inherit name="namedmale" />
+        <hitpoints type="int">40</hitpoints>
+        <maxhitpoints type="int">0</maxhitpoints>
+        <level type="int">1</level>
+        <money type="int">25</money>
+        <alias>Eanatas</alias>
+        <pointsleft type="int">10</pointsleft>
+        <attr name="pov_alias">Eanatas</attr>
+        <statusattributes type="stringdictionary">
+          <item>
+            <key>flyingturnsleft</key>
+            <value>Flying turns left: !</value>
+          </item>
+          <item>
+            <key>youare</key>
+            <value>You are: !</value>
+          </item>
+        </statusattributes>
+        <flying type="boolean">false</flying>
+        <flyingturnsleft type="int">10</flyingturnsleft>
+        <youare>Walking</youare>
+        <lastroom type="string"></lastroom>
+        <attlist type="stringlist">
+          <value>strength</value>
+          <value>agility</value>
+          <value>stamina</value>
+          <value>intelligence</value>
+        </attlist>
+        <strength type="int">6</strength>
+        <stamina type="int">5</stamina>
+        <intelligence type="int">5</intelligence>
+        <agility type="int">6</agility>
+        <maxpoints type="int">10</maxpoints>
+        <feature_startscript />
+        <turnedtostone type="boolean">false</turnedtostone>
+        <attackbonus type="int">1</attackbonus>
+        <damagedicenumber type="int">2</damagedicenumber>
+        <damagedicesides type="int">8</damagedicesides>
+        <movetype>Free</movetype>
+        <element type="object">fire</element>
+        <changedhitpoints type="script"><![CDATA[
+          JS.eval ("$('#hits-span').html('" + game.pov.hitpoints + "/" + game.pov.maxhitpoints + "');")
+          JS.eval ("$('#hits-indicator').css('padding-right', '" + (200 * game.pov.hitpoints / game.pov.maxhitpoints) + "px');")
+          if (0 >= game.pov.hitpoints) {
+            msg ("<br>You have succumb to your injuries and died! The kingdom of Bristol will continue without you, but to what end?")
+            finish
+          }
+          else {
+            UpdateStatus
+          }
+        ]]></changedhitpoints>
+        <attr name="pov_look" type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><font size=\"30\"><b>Eanatas</b> </font size></center>")
+          msg ("<img src=\"https://bobslifeblog.files.wordpress.com/2018/03/eanatas21.png" + "\" style=\"float:right; width:225px; padding:10px;\"/>")
+          msg ("<b>FLY:</b> For a short time you will have ten turns to fly, then be forced to land to recover a flying point each turn you are walking. So, if you walk for 2 turns after landing you can then fly for 2 turns until  forced to land again, ect., so use them wisely.<br/><b>Flying gives you an attack bonus of  +1 per your level, so timing your flying turns is important.</b><br/><br/>")
+          msg ("<b>TURN:</b> This will turn your flesh to stone. You can observe your surroundings through your minds eye, but can not interact in any way until you 'Turn' back into flesh.")
+          msg ("</br>Using 'turn' during a fight  may deter the attacker from further attacks.<br/>1. They may not want to damage their weapon.<br/>2. Perhaps they no longer do damage with their attacks.<br/>")
+          msg ("Your attack does " + this.damagedicenumber + "d" + this.damagedicesides + "+" + this.damagebonus +"  damage, with a +" +  this.attackbonus + " to hit.")
+          msg ("You have " + this.hitpoints + " hitpoints and are level " + this.level)
+          msg ("</br>{command: Read Eanatas background story}<br/>{command: Back to the action!}")
+        ]]></attr>
+        <backstory type="script"><![CDATA[
+          ViewObjectScreen
+          msg ("<center><font size=\"40\"><b>Eanatas Background</b> </font size></center><br/>")
+          msg ("It has been several years since you were brought to Bristol by your master, Karnuke. Forced into a life of servitude to this evil sorcerer, you have had an opportunity to see the surrounding lands of Mount Mormont. Your curiosity about every aspect of life stirs forgotten feelings within you. <br/><br/>Several month ago you found a clearing in the forest to the south of Mormont. A statue of a woman standing there captivated you, causing you to wonder about the humans that inhabit the area. Feeling compelled to visit every day when time permits, you circle her, watching for a sign of life. <br/><br/>The day you discovered her, you walked around the clearing searching for clues to who she might have been. You were certain that she was watching you, but when you looked she was lifeless as ever, pouring water from a pitcher onto the ground.<br/><br/><b>(Need to add more back story)")
+          msg ("{command: Back to the action!}")
+        ]]></backstory>
+        <changedparent type="script">
+          if (game.pov = this) {
+            if (IsDefined("oldvalue")) {
+              OnEnterRoom (oldvalue)
+            }
+            else {
+              OnEnterRoom (null)
+            }
+            if (game.gridmap) {
+              MergePOVCoordinates
+            }
+          }
+          this.hasbeenmoved = true
+        </changedparent>
+        <attr name="_initialise_" type="script">
+          JS.eval ("$('#hits-span').html('" + game.pov.hitpoints + "/" + game.pov.maxhitpoints + "');")
+          JS.eval ("$('#hits-indicator').css('padding-right', '" + (200 * game.pov.hitpoints / game.pov.maxhitpoints) + "px');")
+        </attr>
+        <object name="fire_ball">
+          <inherit name="editor_object" />
+          <inherit name="attackspell" />
+          <description>Fireballs erupt from your outstretched claws, flying in every direction.</description>
+          <alias>Ignis</alias>
+          <desc>When casting this spell, fire balls will shoot out in all directions from your raised claws and target every foe in the room.</desc>
+          <level type="int">0</level>
+          <element type="object">fire</element>
+          <learn type="script"><![CDATA[
+            if (this.parent = spells_known) {
+              msg ("Er, you already know that one!")
+            }
+            else if ((game.pov.intelligence + game.pov.magicbonus) < this.level * 2) {
+              msg ("That spell is way out of your league. Perhaps if you were more intelligent...")
+            }
+            else if (OkayToLearn(this)) {
+              do (this, "dolearn")
+              SetInventory2 (GetDirectChildren (spells_known))
+            }
+          ]]></learn>
+          <look type="script">
+            if (not HasString(this, "desc")) {
+              P ("It is a spell!")
+            }
+            else {
+              P (this.desc)
+            }
+            msg ("You require an intelligence of " + this.level + " to learn or cast this spell.")
+          </look>
+        </object>
+      </object>
+    </object>
+  </object>
+  <verb>
+    <property>light</property>
+    <pattern>light</pattern>
+    <defaultexpression>"You can't light " + object.article + "."</defaultexpression>
+  </verb>
+  <verb>
+    <property>snuff</property>
+    <pattern>snuff; snuff out; extinquish; put out</pattern>
+    <defaultexpression>"You can't snuff; snuff out; extinquish; put out " + object.article + "."</defaultexpression>
+  </verb>
+  <command name="snuff torch">
+    <pattern>snuff torch; snuff out torch; put out torch; extinquish torch</pattern>
+    <unresolved>There is no torch here to snuff out.</unresolved>
+    <script>
+      ClearTurn
+      AddRoomObjects
+      msg ("You have learned in the past that the torches here are fueled by magic and can not be snuffed out or lit. They always burn, even in water.")
+    </script>
+  </command>
+  <object name="barracks">
+    <inherit name="editor_room" />
+    <usedefaultprefix type="boolean">false</usedefaultprefix>
+    <prefix>the</prefix>
+    <dropdestination type="object">barracks</dropdestination>
+    <exit alias="south" to="cave">
+      <inherit name="southdirection" />
+    </exit>
+    <exit alias="east" to="prison_hall">
+      <inherit name="eastdirection" />
+    </exit>
+  </object>
+  <object name="attribute_adjustment">
+    <inherit name="editor_room" />
+    <alias>Attribute Adjustments</alias>
+    <usedefaultprefix type="boolean">false</usedefaultprefix>
+    <description type="script"><![CDATA[
+      msg ("From here, you will be taken to the character creation kiosk. Please choose your skills wisely and good luck.")
+      msg ("<br/>{command: Level Up:Choose Attributes}")
+    ]]></description>
+  </object>
+  <command name="Turn">
+    <pattern>Turn; turn</pattern>
+    <script><![CDATA[
+      if (player.flying = true) {
+        msg ("You must land first!")
+      }
+      else if (player.turnedtostone = true) {
+        player.turnedtostone = false
+        msg ("You return to flesh and blood.")
+      }
+      else {
+        EnableTimer (healing)
+        msg ("You use your natural ability to turn to stone. {once:<i>You will slowly gain hitpoints in this state. However you will not gain flying turns.</i>}")
+        player.turnedtostone = true
+        get input {
+          if (result = turn) {
+            EnableTimer (healing)
+            msg ("You return to flesh and blood.")
+          }
+        }
+      }
+    ]]></script>
+  </command>
+  <object name="dungeon">
+    <inherit name="editor_room" />
+    <object name="ceiling">
+      <inherit name="editor_object" />
+      <alias>ceiling</alias>
+      <alt type="stringlist">
+        <value>walls</value>
+        <value>floor</value>
+        <value>wall</value>
+        <value>florr</value>
+        <value>cieling</value>
+      </alt>
+      <displayverbs type="stringlist">
+        <value>Look at</value>
+      </displayverbs>
+      <scenery />
+      <look type="script">
+        ClearTurn
+        msg ("{random:The smooth stone surface looks to have been melted to create it.:The surface is smooth to the touch as if it was melted into it's form.:Light glistens off the surface of the smooth stone.}")
+      </look>
+    </object>
+  </object>
+  <verb>
+    <property>kick</property>
+    <pattern>kick</pattern>
+    <defaultexpression>"You can't kick " + object.article + "."</defaultexpression>
+  </verb>
+  <object name="start_room">
+    <inherit name="editor_room" />
+  </object>
+  <object name="pouch">
+    <inherit name="editor_object" />
+    <alias>pouch</alias>
+    <object name="leather_strap">
+      <inherit name="editor_object" />
+      <scenery />
+      <takemsg>It belongs on the pouch. Leave it.</takemsg>
+      <alias>leather strap</alias>
+      <look type="script"><![CDATA[
+        if (leather_pouch.parent = player) {
+          msg ("<br/>A thin leather strap.")
+        }
+        else if (leather_pouch.parent = player.parent) {
+          msg ("<br/>A thin leather strap.")
+        }
+        else {
+          msg ("<br/>You don't see a strap here.")
+        }
+      ]]></look>
+    </object>
+    <object name="emblem">
+      <inherit name="editor_object" />
+      <alias>emblem</alias>
+      <scenery />
+      <look type="script"><![CDATA[
+        if (leather_pouch.parent = player) {
+          msg ("<br/>A circle with a jagged line through it. You do not know what it means.")
+        }
+        else if (leather_pouch.parent = player.parent) {
+          msg ("<br/>A circle with a jagged line through it. You do not know what it means.")
+        }
+        else {
+          msg ("<br/>You don't see an emblem here.")
+        }
+      ]]></look>
+    </object>
+  </object>
+  <function name="DoTake" parameters="object, ismultiple"><![CDATA[
+    prefix = ""
+    if (ismultiple) {
+      prefix = GetDisplayAlias(object) + ": "
+    }
+    if (object.parent = game.pov) {
+      msg (prefix + DynamicTemplate("AlreadyTaken", object))
+    }
+    else if (not ListContains(ScopeReachable(), object)) {
+      msg (prefix + DynamicTemplate("ObjectNotOpen", GetBlockingObject(object)))
+    }
+    else {
+      volume = 0
+      continue = true
+      foreach (obj, GetAllChildObjects(game.pov)) {
+        if (HasInt(obj, "volume")) {
+          volume = volume + obj.volume
+        }
+      }
+      if (not Contains(game.pov, object)) {
+        volume = volume + GetVolume(object,true)
+      }
+      if (HasInt(game.pov, "maxvolume")) {
+        if (volume > game.pov.maxvolume) {
+          continue = false
+          if (HasString(game.pov, "containerfullmessage")) {
+            message = prefix + game.pov.containerfullmessage
+          }
+          else {
+            message = prefix + DynamicTemplate("FullInventory", object)
+          }
+        }
+      }
+      children = GetDirectChildren(game.pov)
+      if (HasInt(game.pov, "maxobjects")) {
+        if (game.pov.maxobjects > 0) {
+          if (ListCount(children) >= game.pov.maxobjects) {
+            continue = false
+            if (HasString(game.pov, "containermaxobjects")) {
+              message = prefix + game.pov.containermaxobjects
+            }
+            else {
+              message = prefix + DynamicTemplate("MaxObjectsInInventory", object)
+            }
+          }
+        }
+      }
+      if (continue = false) {
+        msg ("")
+        msg (message)
+      }
+      else {
+        found = true
+        takemsg = object.takemsg
+        switch (TypeOf(object, "take")) {
+          case ("script") {
+            if (ismultiple) {
+              OutputTextNoBr (prefix)
+            }
+            do (object, "take")
+            takemsg = ""
+          }
+          case ("boolean") {
+            if (object.take = true) {
+              object.parent = game.pov
+              if (takemsg = null) {
+                takemsg = DynamicTemplate("TakeSuccessful", object)
+              }
+            }
+            else {
+              found = false
+            }
+          }
+          case ("string") {
+            object.parent = game.pov
+            takemsg = object.take
+          }
+          default {
+            found = false
+          }
+        }
+        if (not found and takemsg = null) {
+          takemsg = DynamicTemplate("TakeUnsuccessful", object)
+        }
+        if (LengthOf(takemsg) > 0) {
+          msg (prefix + takemsg)
+        }
+        if (HasScript(object, "ontake")) {
+          do (object, "ontake")
+        }
+        if (found and GetBoolean (object, "scenery") and object.parent = game.pov) {
+          object.scenery = false
+        }
+      }
+    }
+  ]]></function>
+  <function name="ClearTurn">
+    ClearScreen
+    ShowRoomDescription
+  </function>
+  <function name="ViewObjectScreen">
+    request (Hide, "Command")
+    request (Hide, "Panes")
+    SetFontSize (15)
+    ClearScreen
+    JS.setGamePadding (100, 100, 50, 0)
+  </function>
+  <function name="ReturnFromViewObjectScreen">
+    SetFontSize (16)
+    request (Show, "Command")
+    request (Show, "Panes")
+    JS.setGamePadding (250, 25, 25, 25)
+    ClearScreen
+    ShowRoomDescription
+  </function>
+  <function name="buylist">
+    if (_PreBuy()) {
+      sl = NewStringDictionary ()
+      foreach (obj, GetDirectChildren(game.pov.parent.shopstock)) {
+        dictionary add (sl, obj.name, CapFirst(GetDisplayAlias (obj)) + " (" + DisplayMoney(BuyingPrice(obj)) + ")")
+      }
+      if (GetBoolean(game, "addnothingtoshoplist")) {
+        dictionary add (sl, "Nothing", "Nothing")
+      }
+      ShowMenu (DynamicTemplate("ShopMenuHeader", game), sl, not GetBoolean(game, "addnothingtoshoplist")) {
+        if (result = "Nothing") {
+          P (DynamicTemplate("ChangeMind", game.pov.parent))
+        }
+        else if (not result = null) {
+          obj = GetObject (result)
+          DoBuy (obj)
+        }
+      }
+    }
+  </function>
+  <function name="ChangeHostility" parameters="race">
+    race_type = race + "s"
+    race_list = DictionaryItem(game.NPC,race_type)
+    foreach (object, race_list) {
+      if (object.mode = "Mean") {
+        object.mode = "Kind"
+        if (ListContains(game.attackers, object)) {
+          list remove (game.attackers, object)
+        }
+      }
+      else if (object.mode = "Kind" ) {
+        object.mode = "Mean"
+        object.attackonsight = true
+        if (not ListContains(game.attackers, object)) {
+          list add (game.attackers, object)
+        }
+      }
+    }
+  </function>
+  <function name="CharacterTypeList" parameters="o">
+    Orcs = NewObjectList()
+    Goblins = NewObjectList()
+    Humans = NewObjectList()
+    Listofnpcs = FilterByType(AllObjects(), "monster")
+    foreach (object, Listofnpcs) {
+      if (object.race = "Orc") {
+        list add (Orcs, object)
+        // Debugging:
+        Log (object +" is an Orc.")
+      }
+      else if (object.race = "Goblin") {
+        list add (Goblins, object)
+        // Debugging:
+        Log (object +" is a Goblin.")
+      }
+      else if (object.race = "Human") {
+        list add (Humans, object)
+        // Debugging:
+        Log (object +" is a Human.")
+      }
+      else {
+        // Debugging:
+        Log (object + " is not Orc, Goblin, or Human.")
+      }
+    }
+    // Debugging:
+    foreach (obj, ListExclude(AllObjects(),Listofnpcs)) {
+      // Debugging:
+      Log (obj +" does not have the type: 'monster'.")
+    }
+    game.Orcs = Orcs
+    game.Goblins = Goblins
+    game.Humans = Humans
+  </function>
+  <function name="NPCListCreation">
+    game.Orcs = FilterByAttribute(AllObjects(), "race", "Orc")
+    game.Goblins = FilterByAttribute(AllObjects(), "race", "Goblin")
+    game.Humans = FilterByAttribute(AllObjects(), "race", "Human")
+    game.NPC = NewDictionary()
+    dictionary add (game.NPC, "Orcs", game.Orcs)
+    dictionary add (game.NPC, "Goblins", game.Goblins)
+    dictionary add (game.NPC, "Humans", game.Humans)
+  </function>
+  <function name="FindRaces">
+    Orcs = NewObjectList()
+    Goblins = NewObjectList()
+    Humans = NewObjectList()
+    Listofnpcs = FilterByType(AllObjects(), "monster")
+    foreach (object, Listofnpcs) {
+      if (object.race = "Orc") {
+        list add (Orcs, object)
+        // Debugging:
+        Log (object +" is an Orc.")
+      }
+      else if (object.race = "Goblin") {
+        list add (Goblins, object)
+        // Debugging:
+        Log (object +" is a Goblin.")
+      }
+      else if (object.race = "Human") {
+        list add (Humans, object)
+        // Debugging:
+        Log (object +" is a Human.")
+      }
+      else {
+        // Debugging:
+        Log (object + " is not Orc, Goblin, or Human.")
+      }
+    }
+    // Debugging:
+    foreach (obj, ListExclude(AllObjects(),Listofnpcs)) {
+      // Debugging:
+      Log (obj +" does not have the type: 'monster'.")
+    }
+    game.Orcs = Orcs
+    game.Goblins = Goblins
+    game.Humans = Humans
+  </function>
+  <function name="ColorInventory2Pane">
+    JS.eval ("$('#Inventory2Wrapper').css('background', '#faebd6')")
+    JS.eval ("$('#Inventory2Wrapper').css('color', 'black')")
+    JS.eval ("$('#Inventory2Wrapper').css('border', '#faebd6')")
+    JS.eval ("$('#Inventory2Label').css('background', '#faebd6')")
+    JS.eval ("$('#Inventory2Label.ui-state-active a').css('color', 'black')")
+    JS.setCss ("#Inventory2Label", "border:1px solid " + game.customlocationbordercolour)
+    JS.setCss ("#Inventory2Wrapper", "border:1px solid " + game.customlocationbordercolour)
+    JS.setCss ("#Inventory2Accordion", "border:0px solid " + game.customlocationbordercolour)
+    JS.eval ("$('#Inventory2Accordion').css('background', '#faebd6')")
+  </function>
+  <function name="PlayerChangedHitpoints"><![CDATA[
+    player.changedhitpoints => {
+      JS.eval ("$('#hits-span').html('" + game.pov.hitpoints + "/" + game.pov.maxhitpoints + "');")
+      JS.eval ("$('#hits-indicator').css('padding-right', '" + (200 * game.pov.hitpoints / game.pov.maxhitpoints) + "px');")
+      if (player.hitpoints <= 0) {
+        msg ("<br></br>You succumb to your injuries and die!")
+        finish
+      }
+    }
+  ]]></function>
+  <function name="ShowRoomDescription"><![CDATA[
+    isDark = CheckDarkness()
+    if (isDark) {
+      descriptionfield = "darkroomdescription"
+    }
+    else {
+      descriptionfield = "description"
+    }
+    if (game.autodescription) {
+      desc = ""
+      for (i, 1, 4) {
+        if (i = game.autodescription_youarein) {
+          if (game.autodescription_youarein_useprefix) {
+            youarein = game.pov.parent.descprefix
+            desc = AddDescriptionLine (desc, youarein + " " + GetDisplayName(game.pov.parent) + ".")
+          }
+          else {
+            desc = AddDescriptionLine (desc, "<b>" + CapFirst(GetDisplayName(game.pov.parent)) + "</b>")
+          }
+          if (game.autodescription_youarein_newline) {
+            msg (desc + "<br/>")
+            desc = ""
+          }
+        }
+        if (i = game.autodescription_youcansee) {
+          objects = FormatObjectList(game.pov.parent.objectslistprefix, GetNonTransparentParent(game.pov.parent), Template("And"), ".")
+          desc = AddDescriptionLine(desc, objects)
+          if (game.autodescription_youcansee_newline) {
+            msg (desc + "<br/>")
+            desc = ""
+          }
+        }
+        if (i = game.autodescription_youcango) {
+          exits = FormatExitList(game.pov.parent.exitslistprefix, GetExitsList(), Template("Or"), ".")
+          desc = AddDescriptionLine(desc, exits)
+          if (game.autodescription_youcango_newline) {
+            msg (desc + "<br/>")
+            desc = ""
+          }
+        }
+        if (i = game.autodescription_description) {
+          if (HasScript(game.pov.parent, descriptionfield)) {
+            if (LengthOf(desc) > 0) {
+              msg (desc)
+              desc = ""
+            }
+            do (game.pov.parent, descriptionfield)
+            if (game.autodescription_description_newline) {
+              msg ("")
+            }
+          }
+          else {
+            desc = AddDescriptionLine(desc, GetRoomDescription())
+            if (game.autodescription_description_newline) {
+              msg (desc + "<br/>")
+              desc = ""
+            }
+          }
+        }
+      }
+      if (LengthOf(desc) > 0) {
+        msg (desc)
+      }
+    }
+    else {
+      if (HasScript(game.pov.parent, descriptionfield)) {
+        do (game.pov.parent, descriptionfield)
+      }
+      else {
+        fulldesc = GetRoomDescription()
+        if (LengthOf(fulldesc) > 0) {
+          msg (fulldesc)
+        }
+      }
+    }
+  ]]></function>
+  <function name="AddRoomObjects">
+    stuff = NewObjectList()
+    stuff = GetDirectChildren(player.parent)
+    foreach (object, stuff) {
+      if (HasString(object, "inroomdescription")) {
+        msg (object.inroomdescription)
+      }
+    }
+  </function>
+  <function name="torchCheck">
+    if (Contains (player.parent,torch)) {
+      foreach (item, GetDirectChildren (torch_holder)) {
+        if (HasAttribute(item, "state")) {
+          msg ("A black iron ring holding a torch, which is " + item.state + ".")
+        }
+        else {
+          msg ("A black iron ring used to hold a torch. It is empty.")
+        }
+      }
+    }
+  </function>
+  <function name="torchState">
+    foreach (item, GetDirectChildren (torch_holder)) {
+      if (HasAttribute(item, "state")) {
+        msg ("A black iron ring holding a torch, which is " + item.state + ", is on the north wall.")
+      }
+      else {
+        msg ("A black iron ring used to hold a torch, is on the north wall. It is empty.")
+      }
+    }
+  </function>
+  <function name="RoomSetUp">
+    ClearTurn
+    AddRoomObjects
+  </function>
+  <function name="attackedWhenStone">
+    ClearTurn
+    msg ("Your attacker stops attacking when he see you turn to stone.")
+  </function>
+  <function name="IntroFinished" parameters="useless">
+    JS.eval ("clearInterval(titleInterval);$('#titletrack').remove();")
+    MoveObject (player, cave)
+    request (Show, "Command")
+    request (Show, "Panes")
+    ClearScreen
+    ShowRoomDescription
+  </function>
+  <function name="introText"><![CDATA[
+    msg ("<audio src='"+GetFileURL("VanAllen Background Music.wav")+"' autoplay id='titletrack'/>")
+    JS.eval ("function doTitles(){var titleI = 0;var titleInterval = setInterval(function(){addTextAndScroll(titles[titleI]);titleI++;if(titleI===titles.length){clearInterval(titleInterval);setTimeout(function(){ASLEvent('IntroFinished','')},6000);}},2000);}")
+    title1 = "<center><h4>by</h4></center>"
+    title2 = "<center><h1>Forgewright</h1></center>"
+    title3 = "<center>Version "+game.version+"<br/>Copyright 2018 (not really, use any part as you see fit). Enjoy</center><br/>"
+    title4 = "<center>Loading Game<img src=\"https://bobslifeblog.files.wordpress.com/2018/02/loading_icon.gif\""
+    title4 = title4 + "style=\"display: block; margin-left: auto; margin-right: auto; width:80px;\"/>"
+    JS.eval ("setTimeout(function(){addTextAndScroll('<br/><center><h1>The Karukian Cave</h1></center>');doTitles();},4000);")
+    JS.eval ("var titles = ['"+title1+"','"+title2+"','"+title3+"','"+title4+"'];")
+    game.suppressturnscripts = true
+  ]]></function>
+  <function name="MovePlayer">
+  </function>
+  <function name="FinishTurn">
+    if (GetBoolean(game,"suppressturnscripts")) {
+      game.suppressturnscripts = false
+    }
+    else {
+      RunTurnScripts
+    }
+    UpdateStatusAttributes
+    CheckDarkness
+    UpdateObjectLinks
+  </function>
+  <javascript src="introScreen2.js" />
+  <javascript src="introScreen.js" />
+  <javascript src="introScreen3.js" />
+  <javascript src="InvPane2.js" />
+  <timer name="healing">
+    <interval>15</interval>
+    <script>
+      if (player.hitpoints = player.maxhitpoints) {
+        DisableTimer (healing)
+      }
+      else {
+        player.hitpoints = player.hitpoints + 1
+        if (player.hitpoints = player.maxhitpoints) {
+          DisableTimer (healing)
+        }
+        msg ("You gained 1 hitpoint!")
+      }
+    </script>
+  </timer>
+</asl>

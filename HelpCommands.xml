@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<library>
+
+
+
+
+<!-- =================================================== -->
+  <!-- Help Commands -->
+
+
+
+  <command name="helpscreen2">
+    <pattern>Continue to Help Links Page; Return to Help Links Kiosk</pattern>
+    <script><![CDATA[
+	  HidePanes
+      ClearScreen
+	  msg ("<center><h2>Welcome to the Eanatas Help Link Kiosk</h2></center>")
+	  msg ("<br></br>Type: help combat, for example, during game play to find a specific help topic.<br></br>")
+	  msg ("<b>{command:Help with combat}")
+	  msg ("<b>{command:Help with spells}")
+	  msg ("<b>{command:Help with potions}")
+	  msg ("<b>{command:Help with keys}")
+	  msg ("<b>{command:Help with armour}")
+	  msg ("<b>{command:Help with creating}")
+	  msg ("<b>{command:Help with stats}")
+	  msg ("<b>{command:Help with hints}")
+	  msg ("<b>{command:Help with commands}")
+	  msg ("<b>{command:Help with commerce}")
+	  msg (" ") 
+	  msg ("<b>{command:I have had enough help for now}") 
+    ]]></script>
+  </command>
+  
+  <command name="help_magic">
+    <pattern>help magic;help spell;help spells;cast spell;learn spell; Help with spells; help with magic</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  SetFontSize (16)
+	  ClearScreen
+      msg ("<center><h2>Help with Magic Page</h2></center>") 	  
+	  msg ("<b>Learn a spell:</b> You will need to find and take a spell or otherwise have it in inventory before you can learn it. Your intelligence must be <i>twice</i> the level of the spell. Type <i>LEARN &lt;spell></i> to learn the spell (eg LEARN UNLOCK to learn the <i>Unlock</i> spell), and it will appear in the Spell Book Pane on the right.")
+      msg ("<b>List Spells</b> To see a list of spells you have learned, type <i>spells.</i> You can LOOK AT a spell to find its level.")
+	  msg ("<b>Cast a spell:</b> Once a spell is learned in your Spell Book, type <i>CAST &lt;spell></i>. This will trigger its effect. NOTE: Attack spells will affect all enemies in your location.")
+      msg ("<b>Lasting Effect:</b> The effect will vary according to the spell. However, it will end if you cast another spell. Attack spells that deal damage are instant and normally do not last unless specified to deal damage for a number of turns.")
+      msg("<b>Limitations:</b> There is no other limitation on what you cast; no power points, mana used or anything like that.")
+	  msg ("<b>Canceling a spell:</b> You can cancel a spell by casting the <i>Cancel</i> spell at any time.")
+	  msg ("You can also click on a spell in the Spell Book on the right to select these above options.")
+	  msg ("<b>Potions:</b> These can only be used once. Healing potions will bring you back to full health. Other potions will give you some bonus that may only last a few rounds. Or, if you are unbelievably lucky, a potion may make a permanent stats change. NOTE: Taking a potion (except healing potions) will cancel any on-going spell effect. ")
+      msg ("<b>Scrolls:</b> These hold attack spells, damaging all monsters present. USED once.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+	  SetFontSize (18)
+    ]]></script>
+  </command>
+  
+  <command name="Help with combat">
+    <pattern>Help with combat; help combat</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  SetFontSize (16)
+	  ClearScreen
+	  msg ("<center><h2>Help with Combat")</h2></center>)
+      msg ("<br></br><b>ATTACK &lt;foe>:</b> Your attack roll, to hit and damage is calculated. Foe then continue to attack each turn, no matter your action. May follow you to another room.")
+      msg ("<b>Feint &lt;foe>:</b> Which will reduce your attack this turn, but give a bonus next turn.")
+      msg ("<b>Parry &lt;foe>:</b> Bonus to your defence, reduces attack.")
+      msg ("<b>Charge  &lt;foe>:</b> which will give a bonus to your attack, but reduce your defence.")
+      msg ("<b>Weapons:</b> To use a certain weapon, you must <i>EQUIP</i> it first. Equipping a weapon unequips the current weapon. A foe's armour is more effective against a weapon that uses multiple dice, so a weapon doing 4d4 damage is good against unarmoured foes, but not as good as a d12 weapon against armoured ones.")
+      msg ("<b>Focus:</b> Gives you a boost to your next attack (if you attack straight away).")
+      msg ("<b>Defence:</b> Your defence is half your agility, minus your armour.")
+      msg ("<b>Armour:</b> Armour reduces the amount of damage you take. Your strength must be four times as high as the armour lvl, otherwise your defence will be zero and your attacks at -5).")
+      msg ("<b>Turns:</b> Foes will only have a turn if your character actually does something. If you mistype and your command is not recognised that does not count as a turn, and foes will not get the opportunity to attack. On the other hand, equipping a weapon or trying unsuccessfully to unlock a door, for example, will count as turns.")
+	  msg ("<br></br><b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+	  SetFontSize (18)
+    ]]></script>
+  </command>
+  
+  <command name="help_armour">
+    <pattern>Help with armour; help armour; help armor</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Armour")</h2></center>)
+      msg ("<br></br>Your armour rating is calculated from a weighted average of all the bits of armour you are wearing on the following locations: feet, shoulders, torso, legs, head, arms, hands. The locations are weighted so head counts double and torso count three times as much as other locations.")
+      msg ("<br></br>Plate armour can be worn on top of other armour, in which case the other armour only counts half. All armour can be worn on top of underwear.")
+	  msg ("<br></br><b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+  <command name="help_stats">
+    <pattern>Help with stats; help stats</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  SetFontSize (16)
+	  ClearScreen
+	  msg ("<center><h2>Help with Stats")</h2></center>)
+      msg ("<br></br>Your character is defined by four statistics:")
+      msg ("<br></br>STAMINA: Used to determine the total hit points.")
+      msg ("<br></br>STRENGTH: Determines the maximum armour that can be worn, also a bonus to attack and damage rolls.")
+      msg ("<br></br>AGILITY: A bonus to attack rolls and to your defence.")
+      msg ("<br></br>INTELLIGENCE: Used to determine the maximum spell level you can learn and cast.")
+      msg(" ")
+      msg ("Type <b>Stats</b> to see your current status. NOTE: The attack bonus does not include any bonus from your current weapon (but both are applied when you make an attack!).")
+	  msg ("<br></br>When you reached a certain spot in the game, you will level up and be given points to distribute to your stats.")
+	  msg(" ")
+      msg ("Type <b>Level</b> command to bring up the leveling screen and raise statistics if you did not spend all your points when you leveled,.")
+	  
+	  msg ("<br></br><b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+	  SetFontSize (18)
+    ]]></script>
+  </command>
+  
+  <command name="help_keys">
+    <pattern>Help with keys; help keys</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Keys")</h2></center>)
+      msg ("There is one key on each level, and it will unlock one door on the next level. If you have the key, the door will be unlocked automatically; no need to type UNLOCK or anything.")
+      msg(" ")
+      msg("Keys do not appear in your inventory; if you make it to level twenty, you could have twenty of them cluttering up the list. To see what keys you do have, use the KEYS command.")
+      msg(" ")
+      msg("You can also use magic to unlock doors.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+  <command name="help_hints">
+    <pattern>Help with hints; help keys</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Hints")</h2></center>)
+      msg ("No hints yet!")
+      msg (" ")
+      msg (" ")
+      msg (" ")
+      msg (" ")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+  <command name="help_potion">
+    <pattern>Help with potions; help potions</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Potions")</h2></center>)
+      msg ("If you can find a recipe you can craft venoms to put on your weapons and other potions too. Use the POTIONS command to see what recipes you currently have, and how much of each fungus and venom you are carrying (venom and fungi do not appear in your inventory).")
+      msg(" ")
+      msg("As well as a recipe you will need a suitable workbench and ingredients. The ingredients are the various coloured fungi you might find growing on the walls. To make a batch of red venom, for example, you will first need to find some red fungus, and use the HARVEST RED FUNGUS command. Then find a workbench, and type BREW RED VENOM. To apply it to your weapon, type APPLY RED VENOM.")
+      msg(" ")
+      msg("You can put venoms on most bladed weapons. The venom lasts until your next successful strike, or until you put the weapon away. Note that some creatures are immune to poison.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+
+  <command name="help_commands">
+    <pattern>Help with commands; help commands</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  SetFontSize (16)
+	  ClearScreen
+	  msg ("<center><h2>Help with Commands")</h2></center>)
+      msg ("<b>Commands introduced to QUEST for this game:")
+      msg ("<br></br><b>EQUIP &lt;weapon>:</b> Ready the weapon to fight. Equip armour and shields.")
+      msg ("<b>ATTACK &lt;foe>:</b> Attack with equipped weapon or claws.")
+      msg ("<b>CHARGE &lt;foe>:</b> Attack with a bonus, but penalty to your defence.")
+      msg ("<b>PARRY &lt;foe>:</b> Attack with defence bonus, but a penalty to your attack.")
+      msg ("<b>FEINT &lt;foe>:</b> Attack with penalty this round, but bonus next round.")
+      msg ("<b>FOCUS:</b> Forego an attack this round to get a bonus next round.")
+      msg ("<b>SEARCH &lt;foe>:</b> Search a body if dead; searching again will find nothing.")
+      msg ("<b>LEARN &lt;spell>:</b> Spell is learned if owned and if intelligence allows it.")
+      msg ("<b>CAST &lt;spell>:</b> The spell is cast if learned.")
+      msg ("<b>BUY:</b> If trader is present, their list of goods are presented.")
+      msg ("<b>SELL&lt;object>:</b> If trader present, item's sold. Buy back at twice the price.")
+      msg ("<b>STATUS:</b> A detailed list of your attributes.")
+      msg ("<b>KEYS:</b> A list of keys you have found.")
+      msg ("<b>VENOM:</b> A list of venom recipes you currently know and how many of each.")
+      msg ("<b>HARVEST &lt;fungus>:</b> To collect some of the fungus.")
+      msg ("<b>BREW &lt;venom>:</b> To create more venom.")
+      msg ("<b>APPLY &lt;venom>:</b> To apply venom to your current weapon.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+	  SetFontSize (18)
+    ]]></script>
+  </command>
+
+  <command name="Help with commerce">
+    <pattern>help commerce; Help with Commerce</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Commerce")</h2></center>)
+      msg ("You need to find a trader to buy and sell.")
+      msg ("To buy something, type <i>BUY</i>. You will be presented with a menu of items in stock. If you do not want anything, just ignore the list and type some other command.")
+      msg ("To sell something, type <i>SELL&lt;object></i>. Useful items will go into the trader's stock, and can be bought back, though at twice the price.")
+      msg("To sell all the useless stuff (including treasure, but not artefacts, weapons, etc.) in your inventory, type SELL JUNK.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+  <command name="help_creating">
+    <pattern>Help with creating; help creating</pattern>
+    <script><![CDATA[
+	  HidePanes
+	  ClearScreen
+	  msg ("<center><h2>Help with Creating Your Own Game")</h2></center>)
+      msg ("Want to create your own RPG-style game? You can find a tutorial and library <a href=\"https://github.com/ThePix/quest/wiki/CombatLib\">here</>.")
+	  msg (" ")
+	  msg ("<b>{command:Return to Help Links Kiosk}")
+	  msg ("<b>{command:I have had enough help for now}")
+    ]]></script>
+  </command>
+  
+  
+  <command name="enough_help">
+    <pattern>I have had enough help for now; done</pattern>
+    <script>
+	  JS.setGamePadding(250, 150, 20, 20)
+      ShowPanes
+      ClearScreen
+      ShowRoomDescription
+    </script>
+  </command>
+  
+  <command name="main_helpscreen">
+    <pattern>help; help me; i need help</pattern>
+    <script><![CDATA[
+	  JS.setGamePadding(50, 50, 20, 20)
+	  HidePanes
+	  ClearScreen
+      msg ("<center><h2>Main Screen of the Eanatas Help Kiosk</h2></center>")
+      msg ("<br></br>Game creation by Robert Hatfield, using the \"Quest\" program created by Alex Warren. This text adventure allows you to type in your commands, giving you a response. However you will find that in some areas, like a shop or viewing a NPC, weapon, armour or this help kiosk, the screen will appear in a Gamebook format and only allow you to select predetermined commands or choices.<br></br> This is because these areas are not normally places of interactive discovery and adventure, speeding up the process of buying and selling or maintaining focus on an information screen. However, there may be some information given to you by certain commands or reading material that may be useful in-game.<br/><br/>When entering a command in the text game areas, I have done everything reasonable to have the game understand. If you get a negative or error looking response try rewording your command before giving up or you may miss valuable information or items.")
+      msg ("<br></br><b>{command: Continue to Help Links Page}</b>")
+	  msg ("<b>{command: I have had enough help for now}</b>")
+    ]]></script>
+  </command>
+  
+  
+  <!--
+  Use for information pages like help or viewing NPC's.
+  -->
+  
+  <function name="HidePanes">
+    request (Hide, "Command")
+    request (Hide, "Panes")
+  </function>
+  
+  <function name="ShowPanes">
+	request (Show, "Command")
+	request (Show, "Panes")
+  </function>
+  
+  
+</library>

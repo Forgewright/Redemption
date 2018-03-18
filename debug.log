@@ -1,0 +1,22 @@
+[0208/060513:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0227/134441:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0310/074410:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0310/125601:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0311/015240:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0311/050328:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0314/173907:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0314/173907:ERROR:ipc_channel_win.cc(460)] pipe error: 232
+[0314/173908:ERROR:ipc_channel_win.cc(460)] pipe error: 232
+[0314/173908:ERROR:ipc_channel_win.cc(171)] pipe error: 109
+[0315/015336:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0316/104944:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0317/055936:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0317/070255:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0317/080124:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0317/134119:ERROR:audio_low_latency_output_win.cc(181)] Bailing out due to non-perfect timing.  Buffer size of 480 is not an even divisor of 1056
+[0317/143156:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0318/100330:ERROR:audio_low_latency_output_win.cc(181)] Bailing out due to non-perfect timing.  Buffer size of 480 is not an even divisor of 1056
+[0318/100341:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0318/102449:ERROR:audio_low_latency_output_win.cc(181)] Bailing out due to non-perfect timing.  Buffer size of 480 is not an even divisor of 1056
+[0318/102523:WARNING:message_in_transit_queue.cc(18)] Destroying nonempty message queue
+[0318/133442:ERROR:audio_low_latency_output_win.cc(181)] Bailing out due to non-perfect timing.  Buffer size of 480 is not an even divisor of 1056
