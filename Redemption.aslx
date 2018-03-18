@@ -118,6 +118,7 @@
     </unresolvedcommandhandler>
     <changedroomlist type="script">
     </changedroomlist>
+    <publishfileextensions>*.jpg;*.jpeg;*.png;*.gif;*.js;*.wav;*.mp3;*.htm;*.html;*.svg;*.ogg</publishfileextensions>
     <turnscript name="TurnCountTurnScriptKV">
       <enabled />
       <script>
@@ -1691,7 +1692,7 @@
     msg ("Your attacker stops attacking when he see you turn to stone.")
   </function>
   <function name="IntroFinished" parameters="useless">
-    JS.eval ("clearInterval(titleInterval);$('#titletrack').remove();")
+    JS.eval ("if(typeof(titleInterval)!='undefined'){clearInterval(titleInterval);}$('#titletrack').remove();")
     MoveObject (player, cave)
     request (Show, "Command")
     request (Show, "Panes")
