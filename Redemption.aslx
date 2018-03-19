@@ -167,6 +167,7 @@
     <object name="spells_known">
       <inherit name="editor_object" />
     </object>
+    <publishfileextensions>*.jpg;*.jpeg;*.png;*.gif;*.js;*.wav;*.mp3;*.htm;*.html;*.svg;*.ogg</publishfileextensions>
   </game>
   <object name="claws">
     <inherit name="weapon" />
